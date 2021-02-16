@@ -1,5 +1,5 @@
 {
-  "name": "@billytech/bloc",
+  "name": "@billitech/bloc",
   "version": "0.0.1",
   "description": "A predictable state management library that helps implement the BLoC design pattern in JavaScript",
   "keywords": [
@@ -23,7 +23,7 @@
   "author": "Okon Sylvester <billytech4134u@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/billytech/bloc.js"
+    "url": "https://github.com/billitech/bloc.js"
   },
   "license": "MIT",
   "engines": {

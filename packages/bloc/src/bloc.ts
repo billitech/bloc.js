@@ -20,7 +20,7 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
   private readonly _transition: Subject<Transition<State, Event>>
   private readonly _transitionSubscription: Subscription
 
-  static observer: BlocObserver<Bloc<any, any>> = new BlocObserver()
+  static observer: BlocObserver = new BlocObserver()
 
   constructor(state: State) {
     this._state = new BehaviorSubject<State>(state)

@@ -1,0 +1,30 @@
+import { createVNode, defineComponent, Fragment } from 'vue'
+import { Bloc, Transition } from '@billitech/bloc'
+import { useBlocState } from '../compositions'
+import { PropType } from 'vue'
+
+export const BlocBuilder = defineComponent({
+  name: 'BlocBuilder',
+
+  props: {
+    bloc: {
+      type: Object as PropType<Bloc<any, any>>,
+      required: false,
+    },
+    buildWhen: {
+      type: Function as PropType<(transition: Transition<any, any>) => boolean>,
+      default: () => true,
+    },
+  },
+
+  setup(props, { slots }) {
+    const { bloc, buildWhen } = props
+
+    const [state, dispatch] = useBlocState<any>(bloc, buildWhen)
+
+    const defaultSlot = slots.default ? slots.default : (param: any[]) => {}
+
+    return () =>
+      createVNode(Fragment, null, [defaultSlot([state.value, dispatch])])
+  },
+})

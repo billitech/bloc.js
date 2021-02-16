@@ -1,19 +1,22 @@
 {
-  "name": "@billitech/bloc",
+  "name": "@billitech/vue-bloc",
   "version": "0.0.1",
-  "description": "A predictable state management library that helps implement the BLoC design pattern in JavaScript",
+  "description": "Vue Components that make it easy to implement the BLoC (Business Logic Component) design pattern. Built to be used with the bloc.js state management package.",
   "keywords": [
+    "vue",
+    "state",
+    "vuejs",
     "state-management",
     "business-logic",
     "BLoC",
     "bloc"
   ],
-  "main": "./dist/bloc.umd.js",
-  "module": "./dist/bloc.es.js",
+  "main": "./dist/vue-bloc.umd.js",
+  "module": "./dist/vue-bloc.es.js",
   "exports": {
     ".": {
-      "import": "./dist/bloc.es.js",
-      "require": "./dist/bloc.umd.js"
+      "import": "./dist/vue-bloc.es.js",
+      "require": "./dist/vue-bloc.umd.js"
     }
   },
   "typings": "dist/types/index.d.ts",
@@ -55,10 +58,14 @@
     "@rollup/plugin-typescript": "^8.2.0",
     "@rollup/plugin-node-resolve": "^11.2.0",
     "rollup-plugin-sourcemaps": "^0.6.3",
+    "typescript": "^4.1.3",
+    "@billitech/bloc": "0.0.2",
     "rxjs": "^7.0.0-beta.10",
-    "typescript": "^4.1.3"
+    "vue": "^3.0.5"
   },
   "peerDependencies": {
-    "rxjs": "7.x.x"
+    "@billitech/bloc": "0.0.x",
+    "rxjs": "^7.x.x",
+    "vue": "^3.x.x"
   }
 }

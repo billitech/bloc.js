@@ -89,12 +89,9 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
 
         const defaultSlot = slots.default
           ? slots.default
-          : (
-              param: [DeepReadonly<BlocState<B>>, (event: BlocEvent<B>) => void]
-            ) => {}
+          : (state: DeepReadonly<BlocState<B>>) => {}
 
-        return () =>
-          createVNode(Fragment, null, [defaultSlot([state.value, dispatch])])
+        return () => createVNode(Fragment, null, [defaultSlot(state.value)])
       },
 
       render() {},

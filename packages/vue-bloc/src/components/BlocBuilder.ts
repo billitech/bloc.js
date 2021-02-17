@@ -20,11 +20,11 @@ export const BlocBuilder = defineComponent({
   setup(props, { slots }) {
     const { bloc, buildWhen } = props
 
-    const [state, dispatch] = useBlocState<any>(bloc, buildWhen)
+    const [state] = useBlocState<any>(bloc, buildWhen)
 
-    const defaultSlot = slots.default ? slots.default : (param: any[]) => {}
+    const defaultSlot = slots.default ? slots.default : (state: any) => {}
 
     return () =>
-      createVNode(Fragment, null, [defaultSlot([state.value, dispatch])])
+      createVNode(Fragment, null, [defaultSlot(state.value)])
   },
 })

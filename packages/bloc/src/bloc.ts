@@ -11,8 +11,8 @@ import { concatMap, map } from 'rxjs/operators'
 import { BlocObserver } from './bloc-observer'
 import { Transition } from './transition'
 
-export type BlocState<B extends Bloc<any, any>> = B['state']
-export type BlocEvent<B extends Bloc<any, any>> = B['___eventType']
+export type BlocState<B extends Bloc<unknown, unknown>> = B['state']
+export type BlocEvent<B extends Bloc<unknown, unknown>> = B['___eventType']
 
 export abstract class Bloc<State, Event> implements Subscribable<State> {
   private readonly _state: BehaviorSubject<State>
@@ -52,17 +52,17 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
   public subscribe(observer?: Partial<Observer<State>>): Subscription
   public subscribe(
     next?: (value: State) => void,
-    error?: (error: any) => void,
+    error?: (error: unknown) => void,
     complete?: () => void
   ): Subscription
   subscribe(
     next?: (value: State) => void,
-    error?: (error: any) => void | null,
+    error?: (error: unknown) => void | null,
     complete?: () => void | null
   ): Subscription
   subscribe(
     observerOrNext?: Partial<Observer<State>> | ((value: State) => void) | null,
-    error?: (error: any) => void,
+    error?: (error: unknown) => void,
     complete?: () => void
   ): Subscription {
     if (typeof observerOrNext === 'function') {
@@ -84,9 +84,19 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
     this._event.next(event)
   }
 
+  protected transformEvents(events: Observable<Event>): Observable<Event> {
+    return events
+  }
+
+  protected transformTransitions(
+    transitions: Observable<Transition<State, Event>>
+  ): Observable<Transition<State, Event>> {
+    return transitions
+  }
+
   private bindEventsToStates(): Subscription {
-    return this._event
-      .pipe(
+    return this.transformTransitions(
+      this.transformEvents(this._event).pipe(
         concatMap((event: Event) => {
           this.onEvent(event)
           return from(this.mapEventToState(event)).pipe(
@@ -96,11 +106,11 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
           )
         })
       )
-      .subscribe((transition) => {
-        this.onTransition(transition)
-        this._transition.next(transition)
-        this._state.next(transition.nextState)
-      })
+    ).subscribe((transition: Transition<State, Event>) => {
+      this.onTransition(transition)
+      this._transition.next(transition)
+      this._state.next(transition.nextState)
+    })
   }
 
   dispose() {

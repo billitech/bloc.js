@@ -109,7 +109,7 @@ export const useBlocState = <
   let subscription: Subscription
 
   onMounted(() => {
-    subscription = blocInstance.transitionStream.subscribe((transition) => {
+    subscription = blocInstance.transitionStream.subscribe((transition: Transition<State, Event>) => {
       if (condition(transition)) {
         state.value = transition.nextState
       }

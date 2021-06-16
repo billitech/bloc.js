@@ -1,10 +1,10 @@
 import { Bloc } from './bloc'
 
 export class CubitEvent<T> {
-  constructor(public state: T, caller: string) {}
+  constructor(public state: T) {}
 }
 
-export class Cubit<State> extends Bloc<State, CubitEvent<State>> {
+export abstract class Cubit<State> extends Bloc<State, CubitEvent<State>> {
   private internalChange: boolean = false
 
   protected async *mapEventToState(
@@ -23,7 +23,7 @@ export class Cubit<State> extends Bloc<State, CubitEvent<State>> {
 
   protected emit(state: State) {
     this.internalChange = true
-    this.add(new CubitEvent(state, arguments.callee.caller.toString()))
+    this.add(new CubitEvent(state))
     this.internalChange = false
   }
 }

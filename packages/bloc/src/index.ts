@@ -4,6 +4,9 @@ export { BlocObserver } from './bloc-observer'
 
 export { FormBloc } from './blocs/form/form-bloc'
 export { FormState, FormStatus } from './blocs/form/form-state'
+
+export { Cubit, CubitEvent } from './cubit'
+
 export {
   FormEvent,
   StatusChanged,

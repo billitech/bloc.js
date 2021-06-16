@@ -9,7 +9,7 @@ import {
 import { provideBloc, useBloc, useBlocState } from './compositions'
 
 export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
-  private readonly _ID
+  private readonly _ID: string
 
   constructor() {
     this._ID = this.createID()

@@ -22,7 +22,7 @@ export const BlocBuilder = defineComponent({
 
     const [state] = useBlocState<any>(bloc, buildWhen)
 
-    const defaultSlot = slots.default ? slots.default : (state: any) => {}
+    const defaultSlot = slots.default ? slots.default : (state: Readonly<unknown>) => {}
 
     return () => createVNode(Fragment, null, [defaultSlot(state.value)])
   },

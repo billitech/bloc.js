@@ -10,6 +10,7 @@ import {
   watch,
   WatchOptions,
   shallowRef,
+  shallowReadonly,
 } from 'vue'
 import {
   Bloc,
@@ -71,7 +72,7 @@ export const useBlocState = <
   ) => boolean = () => true
 ): [
   {
-    readonly value: DeepReadonly<BlocState<B>>
+    readonly value: Readonly<BlocState<B>>
   },
   (event: BlocEvent<B>) => void,
   (
@@ -126,7 +127,7 @@ export const useBlocState = <
     subscription?.unsubscribe()
   })
 
-  return [readonly(state), dispatch, onChanged]
+  return [shallowReadonly(state), dispatch, onChanged]
 }
 
 export const useSubscriptionsContainer = (): SubscriptionsContainer => {

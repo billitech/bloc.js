@@ -1,7 +1,6 @@
 import { Bloc, BlocEvent, BlocState, Transition } from '@billitech/bloc'
 import {
   createVNode,
-  DeepReadonly,
   defineComponent,
   Fragment,
   PropType,
@@ -91,7 +90,7 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
 
         const defaultSlot = slots.default
           ? slots.default
-          : (state: DeepReadonly<BlocState<B>>) => {}
+          : (state: Readonly<BlocState<B>>) => {}
 
         return () => createVNode(Fragment, null, [defaultSlot(state.value)])
       },

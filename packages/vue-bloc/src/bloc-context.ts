@@ -9,18 +9,20 @@ import {
 import { provideBloc, useBloc, useBlocState } from './compositions'
 
 export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
-  private readonly _ID: string
+  private readonly _ID: Symbol
 
   constructor() {
     this._ID = this.createID()
   }
 
   private createID() {
-    return (
-      Array(16)
-        .fill(0)
-        .map(() => String.fromCharCode(Math.floor(Math.random() * 26) + 97))
-        .join('') + Date.now().toString(24)
+    return Symbol(
+      'bloc.' +
+        Array(16)
+          .fill(0)
+          .map(() => String.fromCharCode(Math.floor(Math.random() * 26) + 97))
+          .join('') +
+        Date.now().toString(24)
     )
   }
 

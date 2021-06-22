@@ -23,19 +23,22 @@ import { BlocContext } from './bloc-context'
 export const provideBloc = <
   B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
 >(
-  ID: string | BlocContext<B>,
+  ID: Symbol | BlocContext<B>,
   bloc: (() => B) | B | undefined,
   disposable: boolean = false
 ): void => {
   if (ID instanceof BlocContext) {
     ID = ID.ID
   }
-  provide('bloc.' + ID, bloc)
+  provide(ID, bloc)
 
   if (disposable && ID !== undefined) {
     onUnmounted(() => {
-      useBloc<B>(ID)?.dispose()
-      provide('bloc.' + ID, undefined)
+      if (bloc instanceof Bloc) {
+        bloc.dispose()
+      } else {
+        useBloc<B>(ID)?.dispose()
+      }
     })
   }
 }
@@ -43,13 +46,13 @@ export const provideBloc = <
 export const useBloc = <
   B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
 >(
-  ID: string | BlocContext<B>
+  ID: Symbol | BlocContext<B>
 ): B => {
   if (ID instanceof BlocContext) {
     ID = ID.ID
   }
 
-  const bloc = inject('bloc.' + ID)
+  const bloc = inject(ID)
   if (typeof bloc === 'function') {
     const blocInstance = bloc() as B
     provideBloc(ID, blocInstance)
@@ -62,7 +65,7 @@ export const useBloc = <
 export const useBlocState = <
   B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
 >(
-  bloc: B | string | BlocContext<B>,
+  bloc: B | Symbol | BlocContext<B>,
   condition: (
     transition: Transition<BlocState<B>, BlocEvent<B>>
   ) => boolean = () => true
@@ -109,11 +112,13 @@ export const useBlocState = <
   let subscription: Subscription
 
   onMounted(() => {
-    subscription = blocInstance.transitionStream.subscribe((transition: Transition<State, Event>) => {
-      if (condition(transition)) {
-        state.value = transition.nextState
+    subscription = blocInstance.transitionStream.subscribe(
+      (transition: Transition<State, Event>) => {
+        if (condition(transition)) {
+          state.value = transition.nextState
+        }
       }
-    })
+    )
   })
 
   onUnmounted(() => {

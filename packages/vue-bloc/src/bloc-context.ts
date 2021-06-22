@@ -47,7 +47,7 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
   }
 
   get Provider() {
-    type BlocCallbackProp = PropType<() => B>
+    type BlocCallbackProp = PropType<() => B | B>
     return defineComponent({
       name: 'BlocProvider',
       props: {

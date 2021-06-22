@@ -1,6 +1,5 @@
 import { Subscription } from 'rxjs'
 import {
-  ref,
   inject,
   provide,
   readonly,
@@ -10,6 +9,7 @@ import {
   onUnmounted,
   watch,
   WatchOptions,
+  shallowRef,
 } from 'vue'
 import {
   Bloc,
@@ -97,7 +97,8 @@ export const useBlocState = <
     blocInstance = useBloc(bloc)
   }
 
-  const state = ref(blocInstance.state) as Ref<State>
+  const state = shallowRef(blocInstance.state) as Ref<State>
+  
   const dispatch = (event: Event) => {
     blocInstance.add(event)
   }

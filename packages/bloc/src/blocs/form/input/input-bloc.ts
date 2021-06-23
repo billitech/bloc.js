@@ -31,12 +31,12 @@ export abstract class InputBloc<T, E> extends Bloc<
       yield this.state.copyWith({
         value: event.value,
         initial: false,
-        error: this.validate(event.value),
+        error: this.validate(event.value) ?? null,
       })
     } else if (event instanceof InputUnFocused) {
       yield this.state.copyWith({
         initial: false,
-        error: this.validate(this.state.value),
+        error: this.validate(this.state.value) ?? null,
       })
     } else if (event instanceof ResetInput) {
       yield this.state.copyWith({
@@ -67,5 +67,5 @@ export abstract class InputBloc<T, E> extends Bloc<
     this.add(new InputValidationError<E>(error))
   }
 
-  abstract validate(value: T): E | null
+  abstract validate(value: T): E | null | undefined
 }

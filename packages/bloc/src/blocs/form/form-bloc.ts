@@ -42,15 +42,17 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
   protected validateField(
     field: InputBloc<InputState<unknown, unknown>, unknown>
   ) {
+    const index = this.invalidFields.findIndex(
+      (field2) => field.name === field2.name
+    )
+    if (index > -1) {
+      this.invalidFields.splice(index, 1)
+    }
+
     if (!field.state.value.valid) {
       this.emitStatusChanged(FormStatus.invalid)
       this.invalidFields.push(field)
     } else {
-      const index = this.invalidFields.indexOf(field)
-      if (index > -1) {
-        this.invalidFields.splice(index, 1)
-      }
-
       if (this.initializeFields.length < 1) {
         this.emitStatusChanged(FormStatus.valid)
       }
@@ -89,7 +91,6 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
   }
 
   protected validateForm() {
-    this.invalidFields.splice(0, this.initializeFields.length)
     this.fields.forEach((field) => {
       this.validateField(field)
     })

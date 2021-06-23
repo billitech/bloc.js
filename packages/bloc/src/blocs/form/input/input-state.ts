@@ -24,8 +24,12 @@ export class InputState<T, E> {
     return this._error
   }
 
-  get isValid(): boolean {
-    return this.error == null
+  get valid(): boolean {
+    return this.error === null || this.error === undefined
+  }
+
+  get invalid(): boolean {
+    return this.error !== null && this.error !== undefined
   }
 
   copyWith(payload: {

@@ -6,6 +6,7 @@ import {
   ResetForm,
   FormValidationError,
   FormSubmitted,
+  ValidateForm,
 } from './form-event'
 import { InputBloc } from './input/input-bloc'
 import { FormValidationException } from '../../exceptions/form-validation-exception'
@@ -32,22 +33,28 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
     this.fields.forEach((field) => {
       this.subscriptionsContainer.add = field.subscribe(
         (value: InputState<unknown, unknown>) => {
-          if (!value.isValid) {
-            this.emitStatusChanged(FormStatus.invalid)
-            this.invalidFields.push(field)
-          } else {
-            const index = this.invalidFields.indexOf(field)
-            if (index > -1) {
-              this.invalidFields.splice(index, 1)
-            }
-
-            if (this.initializeFields.length < 1) {
-              this.emitStatusChanged(FormStatus.valid)
-            }
-          }
+          this.validateField(field)
         }
       )
     })
+  }
+
+  protected validateField(
+    field: InputBloc<InputState<unknown, unknown>, unknown>
+  ) {
+    if (!field.state.value.valid) {
+      this.emitStatusChanged(FormStatus.invalid)
+      this.invalidFields.push(field)
+    } else {
+      const index = this.invalidFields.indexOf(field)
+      if (index > -1) {
+        this.invalidFields.splice(index, 1)
+      }
+
+      if (this.initializeFields.length < 1) {
+        this.emitStatusChanged(FormStatus.valid)
+      }
+    }
   }
 
   protected async *mapEventToState(event: FormEvent) {
@@ -63,6 +70,8 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
       if (event.resetForm) {
         this.resetForm()
       }
+    } else if (event instanceof ValidateForm) {
+      this.validateForm()
     } else if (event instanceof ResetForm) {
       this.resetForm()
     } else if (event instanceof FormValidationError) {
@@ -79,6 +88,13 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
     })
   }
 
+  protected validateForm() {
+    this.invalidFields.splice(0, this.initializeFields.length)
+    this.fields.forEach((field) => {
+      this.validateField(field)
+    })
+  }
+
   protected onValidationError(error: FormValidationException) {
     error.error.forEach((value, key) => {
       const field = this.fields.find((field) => field.name === key)
@@ -90,6 +106,10 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
 
   public emitValidationError(error: FormValidationException) {
     this.add(new FormValidationError(error))
+  }
+
+  public emitValidationForm() {
+    this.add(new ValidateForm())
   }
 
   public emitStatusChanged(status: FormStatus) {

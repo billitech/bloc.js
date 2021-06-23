@@ -12,6 +12,7 @@ export {
   StatusChanged,
   FormSubmitted,
   ResetForm,
+  ValidateForm,
   FormValidationError,
 } from './blocs/form/form-event'
 

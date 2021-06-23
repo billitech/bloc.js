@@ -36,6 +36,7 @@ export abstract class InputBloc<T, E> extends Bloc<
     } else if (event instanceof InputUnFocused) {
       yield this.state.copyWith({
         initial: false,
+        error: this.validate(this.state.value),
       })
     } else if (event instanceof ResetInput) {
       yield this.state.copyWith({

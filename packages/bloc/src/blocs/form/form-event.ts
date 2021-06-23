@@ -22,8 +22,9 @@ export class FormSubmitted extends FormEvent {
   }
 }
 
-export class ResetForm extends FormEvent {}
+export class ValidateForm extends FormEvent {}
 
+export class ResetForm extends FormEvent {}
 export class FormValidationError extends FormEvent {
   readonly error: FormValidationException
 

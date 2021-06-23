@@ -18,4 +18,12 @@ export class FormState {
       submitted: payload.submitted ?? this.submitted,
     })
   }
+
+  get valid(): boolean {
+    return this.status === FormStatus.valid
+  }
+
+  get invalid(): boolean {
+    return this.status === FormStatus.invalid
+  }
 }

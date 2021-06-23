@@ -9,7 +9,7 @@ export const BlocBuilder = defineComponent({
   props: {
     bloc: {
       type: Object as PropType<Bloc<any, any>>,
-      required: false,
+      required: true,
     },
     buildWhen: {
       type: Function as PropType<(transition: Transition<any, any>) => boolean>,
@@ -18,11 +18,11 @@ export const BlocBuilder = defineComponent({
   },
 
   setup(props, { slots }) {
-    const { bloc, buildWhen } = props
+    const state = useBlocState<any>(props.bloc, props.buildWhen)
 
-    const state = useBlocState<any>(bloc, buildWhen)
-
-    const defaultSlot = slots.default ? slots.default : (state: Readonly<unknown>) => {}
+    const defaultSlot = slots.default
+      ? slots.default
+      : (state: Readonly<unknown>) => {}
 
     return () => createVNode(Fragment, null, [defaultSlot(state.value)])
   },

@@ -76,8 +76,7 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
         },
       },
       setup: (props, { slots }) => {
-        const { bloc, disposable } = props
-        this.provideBloc(bloc, disposable as boolean)
+        this.provideBloc(props.bloc, props.disposable as boolean)
 
         const defaultSlot = slots.default ? slots.default : () => {}
 
@@ -100,9 +99,7 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
       },
 
       setup: (props, { slots }) => {
-        const { buildWhen } = props
-
-        const state = this.useBlocState(buildWhen)
+        const state = this.useBlocState(props.buildWhen)
 
         const defaultSlot = slots.default
           ? slots.default

@@ -54,7 +54,7 @@ export abstract class InputBloc<T, E> extends Bloc<
     this.add(new InputChanged<T>(value))
   }
 
-  emitInputUnFocused(value: T) {
+  emitInputUnFocused() {
     this.add(new InputUnFocused())
   }
 

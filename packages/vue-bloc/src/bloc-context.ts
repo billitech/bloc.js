@@ -4,8 +4,14 @@ import {
   defineComponent,
   Fragment,
   PropType,
+  WatchOptions,
 } from 'vue'
-import { provideBloc, useBloc, useBlocState } from './compositions'
+import {
+  provideBloc,
+  useBloc,
+  useBlocState,
+  watchBlocState,
+} from './compositions'
 
 export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
   private readonly _ID: Symbol
@@ -43,6 +49,16 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
     ) => boolean = () => true
   ) {
     return useBlocState<B>(this, condition)
+  }
+
+  watchBlocState(
+    callback: (
+      newState: BlocState<B>,
+      oldState: BlocState<B> | undefined
+    ) => void,
+    option?: WatchOptions
+  ) {
+    return watchBlocState<B>(this, callback, option)
   }
 
   get Provider() {
@@ -86,7 +102,7 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
       setup: (props, { slots }) => {
         const { buildWhen } = props
 
-        const [state, dispatch] = this.useBlocState(buildWhen)
+        const state = this.useBlocState(buildWhen)
 
         const defaultSlot = slots.default
           ? slots.default
@@ -94,8 +110,20 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
 
         return () => createVNode(Fragment, null, [defaultSlot(state.value)])
       },
+    })
+  }
 
-      render() {},
+  get Use() {
+    return defineComponent({
+      name: 'BlocUse',
+
+      setup: (props, { slots }) => {
+        const bloc = this.useBloc()
+
+        const defaultSlot = slots.default ? slots.default : (bloc: B) => {}
+
+        return () => createVNode(Fragment, null, [defaultSlot(bloc)])
+      },
     })
   }
 }

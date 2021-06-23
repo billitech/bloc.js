@@ -20,7 +20,7 @@ export const BlocBuilder = defineComponent({
   setup(props, { slots }) {
     const { bloc, buildWhen } = props
 
-    const [state] = useBlocState<any>(bloc, buildWhen)
+    const state = useBlocState<any>(bloc, buildWhen)
 
     const defaultSlot = slots.default ? slots.default : (state: Readonly<unknown>) => {}
 

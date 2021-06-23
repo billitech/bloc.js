@@ -10,7 +10,7 @@ import {
 import { InputBloc } from './input/input-bloc'
 import { FormValidationException } from '../../exceptions/form-validation-exception'
 import { SubscriptionsContainer } from '../../subscriptions-container'
-import { InputState } from './input/input-state';
+import { InputState } from './input/input-state'
 
 export abstract class FormBloc extends Bloc<FormState, FormEvent> {
   abstract get fields(): InputBloc<any, any>[]
@@ -25,26 +25,28 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
       })
     )
 
-    this.initializeFields()
+    setTimeout(() => this.initializeFields(), 0.5)
   }
 
   initializeFields() {
     this.fields.forEach((field) => {
-      this.subscriptionsContainer.add = field.subscribe((value: InputState<unknown, unknown>) => {
-        if (!value.isValid) {
-          this.emitStatusChanged(FormStatus.invalid)
-          this.invalidFields.push(field)
-        } else {
-          const index = this.invalidFields.indexOf(field)
-          if (index > -1) {
-            this.invalidFields.splice(index, 1)
-          }
+      this.subscriptionsContainer.add = field.subscribe(
+        (value: InputState<unknown, unknown>) => {
+          if (!value.isValid) {
+            this.emitStatusChanged(FormStatus.invalid)
+            this.invalidFields.push(field)
+          } else {
+            const index = this.invalidFields.indexOf(field)
+            if (index > -1) {
+              this.invalidFields.splice(index, 1)
+            }
 
-          if (this.initializeFields.length < 1) {
-            this.emitStatusChanged(FormStatus.valid)
+            if (this.initializeFields.length < 1) {
+              this.emitStatusChanged(FormStatus.valid)
+            }
           }
         }
-      })
+      )
     })
   }
 

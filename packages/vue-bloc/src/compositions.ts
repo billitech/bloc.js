@@ -2,10 +2,8 @@ import { Subscription } from 'rxjs'
 import {
   inject,
   provide,
-  readonly,
   onMounted,
   Ref,
-  DeepReadonly,
   onUnmounted,
   watch,
   WatchOptions,
@@ -70,19 +68,9 @@ export const useBlocState = <
   condition: (
     transition: Transition<BlocState<B>, BlocEvent<B>>
   ) => boolean = () => true
-): [
-  {
-    readonly value: Readonly<BlocState<B>>
-  },
-  (event: BlocEvent<B>) => void,
-  (
-    callback: (
-      newState: BlocState<B>,
-      oldState: BlocState<B> | undefined
-    ) => void,
-    option?: WatchOptions
-  ) => void
-] => {
+): {
+  readonly value: Readonly<BlocState<B>>
+} => {
   type State = BlocState<B>
   type Event = BlocEvent<B>
 
@@ -99,17 +87,6 @@ export const useBlocState = <
   }
 
   const state = shallowRef(blocInstance.state) as Ref<State>
-  
-  const dispatch = (event: Event) => {
-    blocInstance.add(event)
-  }
-
-  const onChanged = (
-    callback: (newState: State, oldState: State | undefined) => void,
-    option?: WatchOptions
-  ) => {
-    watch(state, callback, option)
-  }
 
   let subscription: Subscription
 
@@ -127,7 +104,50 @@ export const useBlocState = <
     subscription?.unsubscribe()
   })
 
-  return [shallowReadonly(state), dispatch, onChanged]
+  return shallowReadonly(state)
+}
+
+export const watchBlocState = <
+  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
+>(
+  bloc: B | Symbol | BlocContext<B>,
+  callback: (
+    newState: BlocState<B>,
+    oldState: BlocState<B> | undefined
+  ) => void,
+  option?: WatchOptions
+): void => {
+  type State = BlocState<B>
+  type Event = BlocEvent<B>
+
+  if (bloc instanceof BlocContext) {
+    bloc = bloc.ID
+  }
+
+  let blocInstance: B
+
+  if (bloc instanceof Bloc) {
+    blocInstance = bloc
+  } else {
+    blocInstance = useBloc(bloc)
+  }
+
+  const state = shallowRef(blocInstance.state) as Ref<State>
+
+  watch(state, callback, option)
+  let subscription: Subscription
+
+  onMounted(() => {
+    subscription = blocInstance.transitionStream.subscribe(
+      (transition: Transition<State, Event>) => {
+        state.value = transition.nextState
+      }
+    )
+  })
+
+  onUnmounted(() => {
+    subscription?.unsubscribe()
+  })
 }
 
 export const useSubscriptionsContainer = (): SubscriptionsContainer => {

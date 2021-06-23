@@ -108,7 +108,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
     this.add(new FormValidationError(error))
   }
 
-  public emitValidationForm() {
+  public emitValidateForm() {
     this.add(new ValidateForm())
   }
 

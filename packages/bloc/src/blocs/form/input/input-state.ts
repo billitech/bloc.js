@@ -3,10 +3,10 @@ export type InputErrorType<I extends InputState<any, any>> = I['error']
 
 export class InputState<T, E> {
   private readonly _value: T
-  private readonly _error?: E
+  private readonly _error?: E | null
   private readonly _initial: boolean
 
-  constructor(payload: { value: T; error?: E; initial?: boolean }) {
+  constructor(payload: { value: T; error?: E | null; initial?: boolean }) {
     this._value = payload.value
     this._error = payload.error
     this._initial = payload.initial ?? true
@@ -20,7 +20,7 @@ export class InputState<T, E> {
     return this._initial
   }
 
-  get error(): E | undefined {
+  get error(): E | undefined | null {
     return this._error
   }
 
@@ -34,12 +34,12 @@ export class InputState<T, E> {
 
   copyWith(payload: {
     value?: T
-    error?: E
+    error?: E | null
     initial?: boolean
   }): InputState<T, E> {
     return new InputState({
       value: payload.value ?? this.value,
-      error: payload.error ?? this.error,
+      error: payload.error === undefined ? this.error : payload.error,
       initial: payload.initial ?? this.initial,
     })
   }

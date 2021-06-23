@@ -67,5 +67,5 @@ export abstract class InputBloc<T, E> extends Bloc<
     this.add(new InputValidationError<E>(error))
   }
 
-  abstract validate(value: T): E | undefined
+  abstract validate(value: T): E | null
 }

@@ -40,20 +40,21 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
   }
 
   protected validateField(
-    field: InputBloc<InputState<unknown, unknown>, unknown>
+    field: InputBloc<unknown, unknown>
   ) {
     const index = this.invalidFields.findIndex(
       (field2) => field.name === field2.name
     )
+
     if (index > -1) {
       this.invalidFields.splice(index, 1)
     }
 
-    if (!field.state.value.valid) {
+    if (field.state.invalid) {
       this.emitStatusChanged(FormStatus.invalid)
       this.invalidFields.push(field)
     } else {
-      if (this.initializeFields.length < 1) {
+      if (this.invalidFields.length < 1) {
         this.emitStatusChanged(FormStatus.valid)
       }
     }

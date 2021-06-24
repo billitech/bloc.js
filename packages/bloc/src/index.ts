@@ -26,4 +26,6 @@ export {
   InputValidationError,
 } from './blocs/form/input/input-event'
 
+export { FormValidationException } from './exceptions/form-validation-exception'
+
 export { SubscriptionsContainer } from './subscriptions-container'

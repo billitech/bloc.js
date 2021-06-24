@@ -39,9 +39,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
     })
   }
 
-  protected validateField(
-    field: InputBloc<unknown, unknown>
-  ) {
+  protected validateField(field: InputBloc<unknown, unknown>) {
     const index = this.invalidFields.findIndex(
       (field2) => field.name === field2.name
     )
@@ -98,12 +96,12 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
   }
 
   protected onValidationError(error: FormValidationException) {
-    error.error.forEach((value, key) => {
+    for (const key in error.error) {
       const field = this.fields.find((field) => field.name === key)
       if (field) {
-        field.emitInputValidationError(value)
+        field.emitInputValidationError(error.error[key])
       }
-    })
+    }
   }
 
   public emitValidationError(error: FormValidationException) {

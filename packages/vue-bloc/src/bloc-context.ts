@@ -52,13 +52,9 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
   }
 
   watchBlocState(
-    callback: (
-      newState: BlocState<B>,
-      oldState: BlocState<B> | undefined
-    ) => void,
-    option?: WatchOptions
+    callback: (transition: Transition<BlocState<B>, BlocEvent<B>>) => void,
   ) {
-    return watchBlocState<B>(this, callback, option)
+    return watchBlocState<B>(this, callback)
   }
 
   get Provider() {

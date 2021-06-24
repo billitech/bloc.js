@@ -111,11 +111,7 @@ export const watchBlocState = <
   B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
 >(
   bloc: B | Symbol | BlocContext<B>,
-  callback: (
-    newState: BlocState<B>,
-    oldState: BlocState<B> | undefined
-  ) => void,
-  option?: WatchOptions
+  callback: (transition: Transition<BlocState<B>, BlocEvent<B>>) => void
 ): void => {
   type State = BlocState<B>
   type Event = BlocEvent<B>
@@ -132,15 +128,12 @@ export const watchBlocState = <
     blocInstance = useBloc(bloc)
   }
 
-  const state = shallowRef(blocInstance.state) as Ref<State>
-
-  watch(state, callback, option)
   let subscription: Subscription
 
   onMounted(() => {
     subscription = blocInstance.transitionStream.subscribe(
       (transition: Transition<State, Event>) => {
-        state.value = transition.nextState
+        callback(transition)
       }
     )
   })

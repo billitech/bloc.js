@@ -74,34 +74,22 @@ export const useBlocState = <
   type State = BlocState<B>
   type Event = BlocEvent<B>
 
-  if (bloc instanceof BlocContext) {
-    bloc = bloc.ID
+  if (!(bloc instanceof Bloc)) {
+    bloc = useBloc(bloc)
   }
 
-  let blocInstance: B
+  const state = shallowRef(bloc.state) as Ref<State>
 
-  if (bloc instanceof Bloc) {
-    blocInstance = bloc
-  } else {
-    blocInstance = useBloc(bloc)
-  }
-
-  const state = shallowRef(blocInstance.state) as Ref<State>
-
-  let subscription: Subscription
-
-  onMounted(() => {
-    subscription = blocInstance.transitionStream.subscribe(
-      (transition: Transition<State, Event>) => {
-        if (condition(transition)) {
-          state.value = transition.nextState
-        }
+  const subscription = bloc.transitionStream.subscribe(
+    (transition: Transition<State, Event>) => {
+      if (condition(transition)) {
+        state.value = transition.nextState
       }
-    )
-  })
+    }
+  )
 
   onUnmounted(() => {
-    subscription?.unsubscribe()
+    subscription.unsubscribe()
   })
 
   return shallowReadonly(state)
@@ -111,35 +99,33 @@ export const watchBlocState = <
   B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
 >(
   bloc: B | Symbol | BlocContext<B>,
+  callback: (
+    newState: BlocState<B>,
+    oldState: BlocState<B> | undefined
+  ) => void,
+  option?: WatchOptions
+): void => {
+  const state = useBlocState(bloc)
+  watch(state, callback, option)
+}
+
+export const watchBlocTransition = <
+  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
+>(
+  bloc: B | Symbol | BlocContext<B>,
   callback: (transition: Transition<BlocState<B>, BlocEvent<B>>) => void
 ): void => {
   type State = BlocState<B>
   type Event = BlocEvent<B>
 
-  if (bloc instanceof BlocContext) {
-    bloc = bloc.ID
+  if (!(bloc instanceof Bloc)) {
+    bloc = useBloc(bloc)
   }
 
-  let blocInstance: B
-
-  if (bloc instanceof Bloc) {
-    blocInstance = bloc
-  } else {
-    blocInstance = useBloc(bloc)
-  }
-
-  let subscription: Subscription
-
-  onMounted(() => {
-    subscription = blocInstance.transitionStream.subscribe(
-      (transition: Transition<State, Event>) => {
-        callback(transition)
-      }
-    )
-  })
+  const subscription = bloc.transitionStream.subscribe(callback)
 
   onUnmounted(() => {
-    subscription?.unsubscribe()
+    subscription.unsubscribe()
   })
 }
 

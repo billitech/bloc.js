@@ -11,6 +11,7 @@ import {
   useBloc,
   useBlocState,
   watchBlocState,
+  watchBlocTransition,
 } from './compositions'
 
 export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
@@ -52,9 +53,19 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
   }
 
   watchBlocState(
-    callback: (transition: Transition<BlocState<B>, BlocEvent<B>>) => void,
+    callback: (
+      newState: BlocState<B>,
+      oldState: BlocState<B> | undefined
+    ) => void,
+    option?: WatchOptions
   ) {
     return watchBlocState<B>(this, callback)
+  }
+
+  watchBlocTransition(
+    callback: (transition: Transition<BlocState<B>, BlocEvent<B>>) => void
+  ) {
+    return watchBlocTransition<B>(this, callback)
   }
 
   get Provider() {

@@ -33,11 +33,19 @@ export const provideBloc = <
 
   if (disposable && ID !== undefined) {
     onUnmounted(() => {
-      if (bloc instanceof Bloc) {
-        bloc.dispose()
-      } else {
-        useBloc<B>(ID)?.dispose()
-      }
+      try {
+        if (bloc instanceof Bloc) {
+          bloc.dispose()
+        } else {
+          if (ID instanceof BlocContext) {
+            ID = ID.ID
+          }
+          const bloc = inject(ID) as Ref<(() => B) | B | undefined>
+          if (bloc && bloc.value && bloc.value instanceof Bloc) {
+            bloc.value.dispose()
+          }
+        }
+      } catch (e) {}
     })
   }
 }

@@ -29,7 +29,7 @@ export const provideBloc = <
   if (ID instanceof BlocContext) {
     ID = ID.ID
   }
-  provide(ID, bloc)
+  provide(ID, shallowRef(bloc))
 
   if (disposable && ID !== undefined) {
     onUnmounted(() => {
@@ -51,14 +51,12 @@ export const useBloc = <
     ID = ID.ID
   }
 
-  const bloc = inject(ID)
-  if (typeof bloc === 'function') {
-    const blocInstance = bloc() as B
-    provideBloc(ID, blocInstance)
-    return blocInstance
+  const bloc = inject(ID) as Ref<(() => B) | B>
+  if (typeof bloc.value === 'function') {
+    bloc.value = bloc.value()
   }
 
-  return bloc as B
+  return bloc.value as B
 }
 
 export const useBlocState = <

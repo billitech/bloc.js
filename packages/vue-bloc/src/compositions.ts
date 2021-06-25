@@ -60,16 +60,24 @@ export const useBloc = <
   }
 
   const storedItem = inject(ID) as
-    | Ref<BlocProvideItems | undefined | null>
+    | Ref<BlocProvideItems | B | undefined | null>
+    | B
     | undefined
 
+  if (storedItem && storedItem instanceof Bloc) {
+    return storedItem
+  }
+
   if (storedItem && storedItem.value) {
+    if (storedItem.value instanceof Bloc) {
+      return storedItem.value
+    }
     if (typeof storedItem.value.bloc === 'function') {
       storedItem.value.bloc = storedItem.value.bloc()
     }
   }
 
-  return storedItem?.value?.bloc as B
+  return (storedItem?.value as BlocProvideItems | undefined)?.bloc as B
 }
 
 export const useBlocState = <

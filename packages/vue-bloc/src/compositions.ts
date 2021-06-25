@@ -18,6 +18,13 @@ import {
 } from '@billitech/bloc'
 import { BlocContext } from './bloc-context'
 
+type BlocProvideItems<
+  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
+> = {
+  bloc: (() => B) | B | undefined
+  disposable: boolean
+}
+
 export const provideBloc = <
   B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
 >(
@@ -28,22 +35,18 @@ export const provideBloc = <
   if (ID instanceof BlocContext) {
     ID = ID.ID
   }
-  provide(ID, shallowRef(bloc))
+  provide(
+    ID,
+    shallowRef<BlocProvideItems>({
+      bloc: bloc,
+      disposable: disposable,
+    })
+  )
 
-  if (disposable && ID !== undefined) {
+  if (disposable && bloc instanceof Bloc) {
     onBeforeUnmount(() => {
       try {
-        if (bloc instanceof Bloc) {
-          bloc.dispose()
-        } else {
-          if (ID instanceof BlocContext) {
-            ID = ID.ID
-          }
-          const bloc = inject(ID) as Ref<(() => B) | B | undefined>
-          if (bloc && bloc.value && bloc.value instanceof Bloc) {
-            bloc.value.dispose()
-          }
-        }
+        bloc.dispose()
       } catch (e) {}
     })
   }
@@ -58,12 +61,28 @@ export const useBloc = <
     ID = ID.ID
   }
 
-  const bloc = inject(ID) as Ref<(() => B) | B>
-  if (typeof bloc.value === 'function') {
-    bloc.value = bloc.value()
+  const storedItem = inject(ID) as
+    | Ref<BlocProvideItems | undefined | null>
+    | undefined
+
+  if (storedItem && storedItem.value) {
+    const { bloc, disposable } = storedItem.value
+
+    if (typeof bloc === 'function') {
+      storedItem.value.bloc = bloc()
+      if (disposable && storedItem.value.bloc instanceof Bloc) {
+        onBeforeUnmount(() => {
+          try {
+            if (bloc instanceof Bloc) {
+              bloc.dispose()
+            }
+          } catch (e) {}
+        })
+      }
+    }
   }
 
-  return bloc.value as B
+  return storedItem?.value?.bloc as B
 }
 
 export const useBlocState = <

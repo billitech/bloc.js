@@ -3,7 +3,6 @@ import {
   provide,
   Ref,
   onBeforeUnmount,
-  onUnmounted,
   watch,
   WatchOptions,
   shallowRef,
@@ -35,18 +34,17 @@ export const provideBloc = <
   if (ID instanceof BlocContext) {
     ID = ID.ID
   }
-  provide(
-    ID,
-    shallowRef<BlocProvideItems>({
-      bloc: bloc,
-      disposable: disposable,
-    })
-  )
+  const state = shallowRef<BlocProvideItems>({
+    bloc: bloc,
+    disposable: disposable,
+  })
 
-  if (disposable && bloc instanceof Bloc) {
+  provide(ID, state)
+
+  if (disposable) {
     onBeforeUnmount(() => {
       try {
-        bloc.dispose()
+        if (state.value.bloc instanceof Bloc) state.value.bloc.dispose()
       } catch (e) {}
     })
   }
@@ -66,19 +64,8 @@ export const useBloc = <
     | undefined
 
   if (storedItem && storedItem.value) {
-    const { bloc, disposable } = storedItem.value
-
-    if (typeof bloc === 'function') {
-      storedItem.value.bloc = bloc()
-      if (disposable && storedItem.value.bloc instanceof Bloc) {
-        onBeforeUnmount(() => {
-          try {
-            if (bloc instanceof Bloc) {
-              bloc.dispose()
-            }
-          } catch (e) {}
-        })
-      }
+    if (typeof storedItem.value.bloc === 'function') {
+      storedItem.value.bloc = storedItem.value.bloc()
     }
   }
 

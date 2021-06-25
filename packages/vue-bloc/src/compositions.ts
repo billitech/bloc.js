@@ -1,9 +1,8 @@
-import { Subscription } from 'rxjs'
 import {
   inject,
   provide,
-  onMounted,
   Ref,
+  onBeforeUnmount,
   onUnmounted,
   watch,
   WatchOptions,
@@ -32,7 +31,7 @@ export const provideBloc = <
   provide(ID, shallowRef(bloc))
 
   if (disposable && ID !== undefined) {
-    onUnmounted(() => {
+    onBeforeUnmount(() => {
       try {
         if (bloc instanceof Bloc) {
           bloc.dispose()
@@ -94,7 +93,7 @@ export const useBlocState = <
     }
   )
 
-  onUnmounted(() => {
+  onBeforeUnmount(() => {
     subscription.unsubscribe()
   })
 
@@ -130,7 +129,7 @@ export const watchBlocTransition = <
 
   const subscription = bloc.transitionStream.subscribe(callback)
 
-  onUnmounted(() => {
+  onBeforeUnmount(() => {
     subscription.unsubscribe()
   })
 }
@@ -138,7 +137,7 @@ export const watchBlocTransition = <
 export const useSubscriptionsContainer = (): SubscriptionsContainer => {
   const container = new SubscriptionsContainer()
 
-  onUnmounted(() => {
+  onBeforeUnmount(() => {
     container.dispose()
   })
 

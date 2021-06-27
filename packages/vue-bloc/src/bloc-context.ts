@@ -59,7 +59,7 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
     ) => void,
     option?: WatchOptions
   ) {
-    return watchBlocState<B>(this, callback)
+    return watchBlocState<B>(this, callback, option)
   }
 
   watchBlocTransition(

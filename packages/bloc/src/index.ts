@@ -26,6 +26,13 @@ export {
   InputValidationError,
 } from './blocs/form/input/input-event'
 
+export { FormHandlerBloc } from './blocs/form/handler/form-handler-bloc'
+export { FormHandlerState, FormHandlerStatus } from './blocs/form/handler/form-handler-state'
+export {
+  FormHandlerEvent,
+  ButtonPressed,
+} from './blocs/form/handler/form-handler-event'
+
 export { FormValidationException } from './exceptions/form-validation-exception'
 
 export { SubscriptionsContainer } from './subscriptions-container'

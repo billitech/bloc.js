@@ -7,6 +7,7 @@ import {
   FormValidationError,
   FormSubmitted,
   ValidateForm,
+  LoadingChanged,
 } from './form-event'
 import { InputBloc } from './input/input-bloc'
 import { FormValidationException } from '../../exceptions/form-validation-exception'
@@ -23,6 +24,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
       new FormState({
         status: FormStatus.invalid,
         submitted: false,
+        loading: false
       })
     )
 
@@ -63,10 +65,15 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
       yield this.state.copyWith({
         status: event.status,
       })
+    } else if (event instanceof LoadingChanged) {
+      yield this.state.copyWith({
+        loading: event.loading,
+      })
     } else if (event instanceof FormSubmitted) {
       yield this.state.copyWith({
         status: event.status,
         submitted: true,
+        loading: false
       })
       if (event.resetForm) {
         this.resetForm()
@@ -114,6 +121,10 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
 
   public emitStatusChanged(status: FormStatus) {
     this.add(new StatusChanged(status))
+  }
+
+  public emitLoadingChanged(loading: boolean) {
+    this.add(new LoadingChanged(loading))
   }
 
   public emitFormSubmitted(status: FormStatus, resetForm: boolean) {

@@ -16,6 +16,10 @@ export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
   protected async *mapEventToState(event: FormHandlerEvent) {
     if (event instanceof ButtonPressed) {
       try {
+        yield this.state.copyWith({
+          status: FormHandlerStatus.loading,
+        })
+        event.form.emitLoadingChanged(true)
         const res = await this.handleFormSubmission(event.form)
         yield this.state.copyWith({
           status: FormHandlerStatus.success,
@@ -32,18 +36,23 @@ export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
 
           event.form.emitValidationError(error)
         } else if (typeof error == 'object') {
-          yield this.state.copyWith({
-            status: FormHandlerStatus.failure,
-            error: error?.toString() ?? "An error occurred",
-          })
-          event.form.emitStatusChanged(FormStatus.invalid)
+          if (error !== null && 'message' in error) {
+            yield this.state.copyWith({
+              status: FormHandlerStatus.failure,
+              error:
+                (error as { message: string }).message ?? 'An error occurred',
+            })
+          } else {
+            yield this.state.copyWith({
+              status: FormHandlerStatus.failure,
+              error: error?.toString() ?? 'An error occurred',
+            })
+          }
         } else {
           yield this.state.copyWith({
             status: FormHandlerStatus.failure,
             error: error as string,
           })
-
-          event.form.emitStatusChanged(FormStatus.invalid)
         }
       }
     }

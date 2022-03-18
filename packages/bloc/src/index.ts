@@ -10,6 +10,7 @@ export { Cubit, CubitEvent } from './cubit'
 export {
   FormEvent,
   StatusChanged,
+  LoadingChanged,
   FormSubmitted,
   ResetForm,
   ValidateForm,

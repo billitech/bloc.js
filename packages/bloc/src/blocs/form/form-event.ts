@@ -11,6 +11,14 @@ export class StatusChanged extends FormEvent {
   }
 }
 
+export class LoadingChanged extends FormEvent {
+  readonly loading: boolean
+  constructor(loading: boolean) {
+    super()
+    this.loading = loading
+  }
+}
+
 export class FormSubmitted extends FormEvent {
   readonly status: FormStatus
   readonly resetForm: boolean

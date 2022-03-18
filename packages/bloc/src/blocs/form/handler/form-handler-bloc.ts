@@ -39,13 +39,21 @@ export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
           if (error !== null && 'message' in error) {
             yield this.state.copyWith({
               status: FormHandlerStatus.failure,
+              validationError: null,
               error:
                 (error as { message: string }).message ?? 'An error occurred',
+            })
+          } else if (error !== null && 'error' in error) {
+            yield this.state.copyWith({
+              status: FormHandlerStatus.failure,
+              validationError: null,
+              error: (error as { error: string }).error ?? 'An error occurred',
             })
           } else {
             yield this.state.copyWith({
               status: FormHandlerStatus.failure,
               error: error?.toString() ?? 'An error occurred',
+              validationError: null,
             })
           }
           event.form.emitLoadingChanged(false)
@@ -53,6 +61,7 @@ export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
           yield this.state.copyWith({
             status: FormHandlerStatus.failure,
             error: error as string,
+            validationError: null,
           })
           event.form.emitLoadingChanged(false)
         }

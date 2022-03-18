@@ -48,11 +48,13 @@ export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
               error: error?.toString() ?? 'An error occurred',
             })
           }
+          event.form.emitLoadingChanged(false)
         } else {
           yield this.state.copyWith({
             status: FormHandlerStatus.failure,
             error: error as string,
           })
+          event.form.emitLoadingChanged(false)
         }
       }
     }

@@ -24,7 +24,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
       new FormState({
         status: FormStatus.invalid,
         submitted: false,
-        loading: false
+        loading: false,
       })
     )
 
@@ -73,7 +73,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
       yield this.state.copyWith({
         status: event.status,
         submitted: true,
-        loading: false
+        loading: false,
       })
       if (event.resetForm) {
         this.resetForm()
@@ -86,6 +86,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
       this.onValidationError(event.error)
       yield this.state.copyWith({
         status: FormStatus.valid,
+        loading: false,
       })
     }
   }

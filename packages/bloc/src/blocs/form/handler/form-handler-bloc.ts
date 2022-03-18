@@ -49,7 +49,7 @@ export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
     }
   }
 
-  abstract handleFormSubmission(form: F): R
+  abstract handleFormSubmission(form: F): Promise<R> | R
 
   emitButtonPressed(form: F) {
     this.add(new ButtonPressed(form))

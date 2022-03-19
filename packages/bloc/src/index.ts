@@ -52,6 +52,9 @@ export {
 export type {
   ValidatorFunc,
   ErrorFormatterFunc,
+} from './blocs/form/input/validation'
+
+export {
   Rule,
   validate,
   IsEmail,

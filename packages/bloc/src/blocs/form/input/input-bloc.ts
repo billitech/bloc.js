@@ -7,15 +7,17 @@ import {
   InputValidationError,
   ResetInput,
 } from './input-event'
+import { Rule, validate } from './validation'
 
-export abstract class InputBloc<T, E> extends Bloc<
+export class InputBloc<T, E> extends Bloc<
   InputState<T, E>,
   InputEvent<T, E>
 > {
   readonly name: string
   readonly initialValue: T
+  readonly validationRules: Rule<T, E>[]
 
-  constructor(payload: { name: string; value: T }) {
+  constructor(payload: { name: string; value: T; rules?: Rule<T, E>[] }) {
     super(
       new InputState({
         value: payload.value,
@@ -24,6 +26,7 @@ export abstract class InputBloc<T, E> extends Bloc<
     )
     this.initialValue = payload.value
     this.name = payload.name
+    this.validationRules = payload.rules ?? []
   }
 
   protected async *mapEventToState(event: InputEvent<T, E>) {
@@ -67,5 +70,7 @@ export abstract class InputBloc<T, E> extends Bloc<
     this.add(new InputValidationError<E>(error))
   }
 
-  abstract validate(value: T): E | null | undefined
+  validate(value: T) {
+    return validate<T, E>(value, this.name, this.validationRules)
+  }
 }

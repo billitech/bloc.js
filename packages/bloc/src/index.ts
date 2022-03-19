@@ -28,7 +28,10 @@ export {
 } from './blocs/form/input/input-event'
 
 export { FormHandlerBloc } from './blocs/form/handler/form-handler-bloc'
-export { FormHandlerState, FormHandlerStatus } from './blocs/form/handler/form-handler-state'
+export {
+  FormHandlerState,
+  FormHandlerStatus,
+} from './blocs/form/handler/form-handler-state'
 export {
   FormHandlerEvent,
   ButtonPressed,
@@ -37,3 +40,28 @@ export {
 export { FormValidationException } from './exceptions/form-validation-exception'
 
 export { SubscriptionsContainer } from './subscriptions-container'
+
+export {
+  StringInputBloc,
+  EmailInputBloc,
+  NumberInputBloc,
+  FileInputBloc,
+  BooleanInputBloc,
+} from './blocs/form/input/inputs'
+
+export type {
+  ValidatorFunc,
+  ErrorFormatterFunc,
+  Rule,
+  validate,
+  IsEmail,
+  IsRequired,
+  IsSame,
+  IsLength,
+  IsIn,
+  MatchRegex,
+  IsMin,
+  IsMax,
+  IsRequiredIf,
+  IsRequiredUnless
+} from './blocs/form/input/validation'

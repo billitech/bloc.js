@@ -1,0 +1,12 @@
+import { deepEqual } from '../../../../../util'
+import { InputBloc } from '../../input-bloc'
+import { Rule } from '../rule'
+
+
+export const IsSame = <T>(bloc: InputBloc<T, unknown>) =>
+  new Rule<T, string>({
+    errorMessage: 'Invalid {field} value',
+    validator: (value: T) => {
+      return deepEqual(value, bloc.state.value)
+    },
+  })

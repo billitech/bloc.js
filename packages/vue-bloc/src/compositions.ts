@@ -2,11 +2,11 @@ import {
   inject,
   provide,
   Ref,
-  onBeforeUnmount,
   watch,
   WatchOptions,
   shallowRef,
   shallowReadonly,
+  onUnmounted,
 } from 'vue'
 import {
   Bloc,
@@ -40,14 +40,13 @@ export const provideBloc = <
   })
 
   provide(ID, state)
-
-  if (disposable) {
-    onBeforeUnmount(() => {
+  onUnmounted(() => {
+    if (disposable) {
       try {
         if (state.value.bloc instanceof Bloc) state.value.bloc.dispose()
       } catch (e) {}
-    })
-  }
+    }
+  })
 }
 
 export const useBloc = <
@@ -107,7 +106,7 @@ export const useBlocState = <
     }
   )
 
-  onBeforeUnmount(() => {
+  onUnmounted(() => {
     subscription.unsubscribe()
   })
 
@@ -143,7 +142,7 @@ export const watchBlocTransition = <
 
   const subscription = bloc.transitionStream.subscribe(callback)
 
-  onBeforeUnmount(() => {
+  onUnmounted(() => {
     subscription.unsubscribe()
   })
 }
@@ -151,7 +150,7 @@ export const watchBlocTransition = <
 export const useSubscriptionsContainer = (): SubscriptionsContainer => {
   const container = new SubscriptionsContainer()
 
-  onBeforeUnmount(() => {
+  onUnmounted(() => {
     container.dispose()
   })
 

@@ -41,7 +41,7 @@ export class FormState extends Equatable {
     return this.status === FormStatus.invalid
   }
 
-  get props(): any[] {
-    throw [this.status, this.loading, this.submitted]
+  get props(): unknown[] {
+    return [this.status, this.loading, this.submitted]
   }
 }

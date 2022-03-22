@@ -8,12 +8,11 @@ import {
   ResetInput,
 } from './input-event'
 import { Rule, validate } from './validation'
+import { toTitleCase } from '../../../util'
 
-export class InputBloc<T, E> extends Bloc<
-  InputState<T, E>,
-  InputEvent<T, E>
-> {
+export class InputBloc<T, E> extends Bloc<InputState<T, E>, InputEvent<T, E>> {
   readonly name: string
+  readonly title: string
   readonly initialValue: T
   readonly validationRules: Rule<T, E>[]
 
@@ -26,6 +25,7 @@ export class InputBloc<T, E> extends Bloc<
     )
     this.initialValue = payload.value
     this.name = payload.name
+    this.title = toTitleCase(payload.name)
     this.validationRules = payload.rules ?? []
   }
 
@@ -71,6 +71,6 @@ export class InputBloc<T, E> extends Bloc<
   }
 
   validate(value: T) {
-    return validate<T, E>(value, this.name, this.validationRules)
+    return validate<T, E>(value, this.title, this.validationRules)
   }
 }

@@ -1,7 +1,7 @@
 import { deepEqual } from 'fast-equals'
 
 export abstract class Equatable {
-  abstract get props(): any[]
+  abstract get props(): unknown[]
 }
 
 export function isEqual(obj1: Equatable, obj2: Equatable): boolean {

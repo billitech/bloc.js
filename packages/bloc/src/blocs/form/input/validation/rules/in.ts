@@ -1,5 +1,5 @@
+import { deepEqual } from 'fast-equals'
 import { Rule } from '../rule'
-import { deepEqual } from '../../../../../util'
 
 export function IsIn(...stack: unknown[]) {
   return new Rule<string | number, string>({

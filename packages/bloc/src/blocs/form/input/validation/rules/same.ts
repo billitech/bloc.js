@@ -1,4 +1,4 @@
-import { deepEqual } from '../../../../../util'
+import { deepEqual } from 'fast-equals'
 import { InputBloc } from '../../input-bloc'
 import { Rule } from '../rule'
 

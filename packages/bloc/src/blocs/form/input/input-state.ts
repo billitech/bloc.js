@@ -1,12 +1,14 @@
+import { Equatable } from '../../../equatable';
 export type InputValueType<I extends InputState<any, any>> = I['value']
 export type InputErrorType<I extends InputState<any, any>> = I['error']
 
-export class InputState<T, E> {
+export class InputState<T, E> extends Equatable {
   private readonly _value: T
   private readonly _error?: E | null
   private readonly _initial: boolean
 
   constructor(payload: { value: T; error?: E | null; initial?: boolean }) {
+    super()
     this._value = payload.value
     this._error = payload.error
     this._initial = payload.initial ?? true
@@ -42,5 +44,9 @@ export class InputState<T, E> {
       error: payload.error === undefined ? this.error : payload.error,
       initial: payload.initial ?? this.initial,
     })
+  }
+
+  get props(): any[] {
+    return [this.value, this.error, this.initial]
   }
 }

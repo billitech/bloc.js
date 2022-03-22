@@ -7,6 +7,8 @@ export { FormState, FormStatus } from './blocs/form/form-state'
 
 export { Cubit, CubitEvent } from './cubit'
 
+export { Equatable } from './equatable'
+
 export {
   FormEvent,
   StatusChanged,

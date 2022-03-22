@@ -10,6 +10,8 @@ import {
 import { concatMap, map } from 'rxjs/operators'
 import { BlocObserver } from './bloc-observer'
 import { Transition } from './transition'
+import { deepEqual } from 'fast-equals'
+import { Equatable, isEqual } from './equatable'
 
 export type BlocState<B extends Bloc<unknown, unknown>> = B['state']
 export type BlocEvent<B extends Bloc<unknown, unknown>> = B['___eventType']
@@ -19,8 +21,8 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
   private readonly _event: Subject<Event>
   private readonly _transition: Subject<Transition<State, Event>>
   private readonly _transitionSubscription: Subscription
-
   static observer: BlocObserver = new BlocObserver()
+  private emitted: boolean = false
 
   constructor(state: State) {
     this._state = new BehaviorSubject<State>(state)
@@ -107,10 +109,24 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
         })
       )
     ).subscribe((transition: Transition<State, Event>) => {
-      this.onTransition(transition)
-      this._transition.next(transition)
-      this._state.next(transition.nextState)
+      if (
+        this.emitted === false ||
+        this.statesEqual(transition.currentState, transition.nextState) == false
+      ) {
+        this.onTransition(transition)
+        this._transition.next(transition)
+        this._state.next(transition.nextState)
+        this.emitted = true
+      }
     })
+  }
+
+  statesEqual(currentState: State, nextState: State): boolean {
+    if (currentState instanceof Equatable && nextState instanceof Equatable) {
+      return isEqual(currentState, nextState)
+    } else {
+      return deepEqual(currentState, nextState)
+    }
   }
 
   dispose() {

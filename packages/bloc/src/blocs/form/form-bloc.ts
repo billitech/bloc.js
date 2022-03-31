@@ -99,7 +99,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
 
   protected validateForm() {
     this.fields.forEach((field) => {
-      this.validateField(field)
+      field.emitInputUnFocused()
     })
   }
 

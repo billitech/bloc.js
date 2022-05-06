@@ -9,6 +9,6 @@ export const IsMaxFileSize = (max: number) =>
         .replaceAll('{field}', field)
         .replaceAll('{max}', formatBytes(max)),
     validator: (value: File) => {
-      return value.size > max
+      return value.size <= max
     },
   })

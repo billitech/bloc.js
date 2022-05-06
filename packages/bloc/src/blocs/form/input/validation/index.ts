@@ -14,6 +14,7 @@ export {
   IsNumeric,
   IsMin,
   IsMax,
+  IsMaxFileSize,
   IsRequiredIf,
   IsRequiredUnless
 } from './rules'

@@ -71,6 +71,7 @@ export {
   MatchRegex,
   IsMin,
   IsMax,
+  IsMaxFileSize,
   IsRequiredIf,
   IsRequiredUnless
 } from './blocs/form/input/validation'

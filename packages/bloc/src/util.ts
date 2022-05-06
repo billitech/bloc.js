@@ -12,7 +12,7 @@ export const validateRequired = (
   }
 
   if (value instanceof File) {
-    return value.name.length < 1
+    return value.name.length > 0 && value.size > 0
   }
   return true
 }

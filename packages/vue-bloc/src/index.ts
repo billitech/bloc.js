@@ -4,6 +4,7 @@ export {
   provideBloc,
   useBloc,
   useBlocState,
+  watchBlocTransition,
   watchBlocState,
   useSubscriptionsContainer,
 } from './compositions'

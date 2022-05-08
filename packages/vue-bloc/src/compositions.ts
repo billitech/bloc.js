@@ -6,7 +6,7 @@ import {
   WatchOptions,
   shallowRef,
   shallowReadonly,
-  onUnmounted,
+  onBeforeUnmount,
 } from 'vue'
 import {
   Bloc,
@@ -40,7 +40,7 @@ export const provideBloc = <
   })
 
   provide(ID, state)
-  onUnmounted(() => {
+  onBeforeUnmount(() => {
     if (disposable) {
       try {
         if (state.value.bloc instanceof Bloc) state.value.bloc.dispose()
@@ -106,7 +106,7 @@ export const useBlocState = <
     }
   )
 
-  onUnmounted(() => {
+  onBeforeUnmount(() => {
     subscription.unsubscribe()
   })
 
@@ -142,7 +142,7 @@ export const watchBlocTransition = <
 
   const subscription = bloc.transitionStream.subscribe(callback)
 
-  onUnmounted(() => {
+  onBeforeUnmount(() => {
     subscription.unsubscribe()
   })
 }
@@ -150,7 +150,7 @@ export const watchBlocTransition = <
 export const useSubscriptionsContainer = (): SubscriptionsContainer => {
   const container = new SubscriptionsContainer()
 
-  onUnmounted(() => {
+  onBeforeUnmount(() => {
     container.dispose()
   })
 

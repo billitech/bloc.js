@@ -5,7 +5,7 @@ export class FileInputBloc extends InputBloc<File, string> {
   constructor(payload: {
     name: string
     value?: File
-    isRequired: false,
+    isRequired?: boolean,
     rules?: Rule<File, string>[]
   }) {
     super({

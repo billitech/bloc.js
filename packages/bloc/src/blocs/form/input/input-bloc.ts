@@ -23,7 +23,7 @@ export abstract class InputBloc<T, E> extends Bloc<
   constructor(payload: {
     name: string
     value: T
-    isRequired: false
+    isRequired?: boolean
     rules?: Rule<T, E>[]
   }) {
     super(
@@ -36,7 +36,7 @@ export abstract class InputBloc<T, E> extends Bloc<
     this.name = payload.name
     this.title = toTitleCase(payload.name)
     this.validationRules = payload.rules ?? []
-    this.isRequired = payload.isRequired
+    this.isRequired = payload.isRequired ?? false
   }
 
   protected async *mapEventToState(event: InputEvent<T, E>) {

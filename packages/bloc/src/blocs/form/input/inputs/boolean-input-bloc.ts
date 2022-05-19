@@ -5,7 +5,7 @@ export class BooleanInputBloc extends InputBloc<boolean, string> {
   constructor(payload: {
     name: string
     value?: boolean
-    isRequired: false
+    isRequired?: boolean,
     rules?: Rule<boolean, string>[]
   }) {
     super({
@@ -16,7 +16,7 @@ export class BooleanInputBloc extends InputBloc<boolean, string> {
     })
   }
 
-  validateRequired(value: boolean): string | undefined {
+  validateRequired(_: boolean): string | undefined {
     return undefined
   }
 }

@@ -5,7 +5,7 @@ export class NumberInputBloc extends InputBloc<number, string> {
   constructor(payload: {
     name: string
     value?: number
-    isRequired: false,
+    isRequired?: boolean,
     rules?: Rule<number, string>[]
   }) {
     super({

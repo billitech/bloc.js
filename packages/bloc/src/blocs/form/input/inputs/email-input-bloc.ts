@@ -6,6 +6,7 @@ export class EmailInputBloc extends StringInputBloc {
   constructor(payload: {
     name: string
     value?: string
+    isRequired: false,
     rules?: Rule<string, string>[]
   }) {
     super(payload)

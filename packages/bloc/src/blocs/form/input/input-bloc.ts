@@ -10,13 +10,22 @@ import {
 import { Rule, validate } from './validation'
 import { toTitleCase } from '../../../util'
 
-export class InputBloc<T, E> extends Bloc<InputState<T, E>, InputEvent<T, E>> {
+export abstract class InputBloc<T, E> extends Bloc<
+  InputState<T, E>,
+  InputEvent<T, E>
+> {
   readonly name: string
   readonly title: string
   readonly initialValue: T
   readonly validationRules: Rule<T, E>[]
+  readonly isRequired: boolean
 
-  constructor(payload: { name: string; value: T; rules?: Rule<T, E>[] }) {
+  constructor(payload: {
+    name: string
+    value: T
+    isRequired: false
+    rules?: Rule<T, E>[]
+  }) {
     super(
       new InputState({
         value: payload.value,
@@ -27,6 +36,7 @@ export class InputBloc<T, E> extends Bloc<InputState<T, E>, InputEvent<T, E>> {
     this.name = payload.name
     this.title = toTitleCase(payload.name)
     this.validationRules = payload.rules ?? []
+    this.isRequired = payload.isRequired
   }
 
   protected async *mapEventToState(event: InputEvent<T, E>) {
@@ -54,6 +64,8 @@ export class InputBloc<T, E> extends Bloc<InputState<T, E>, InputEvent<T, E>> {
     }
   }
 
+  abstract validateRequired(value: T): E | undefined
+
   emitInputChanged(value: T) {
     this.add(new InputChanged<T>(value))
   }
@@ -71,6 +83,14 @@ export class InputBloc<T, E> extends Bloc<InputState<T, E>, InputEvent<T, E>> {
   }
 
   validate(value: T) {
-    return validate<T, E>(value, this.title, this.validationRules)
+    if (this.isRequired) {
+      const error = this.validateRequired(value)
+      if (error) {
+        return error
+      }
+      return validate<T, E>(value, this.title, this.validationRules)
+    } else if (this.validateRequired(value) == undefined) {
+      return validate<T, E>(value, this.title, this.validationRules)
+    }
   }
 }

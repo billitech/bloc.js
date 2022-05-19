@@ -35,9 +35,9 @@ export {
   FormHandlerStatus,
 } from './blocs/form/handler/form-handler-state'
 export {
-  FormHandlerEvent,
   ButtonPressed,
 } from './blocs/form/handler/form-handler-event'
+
 
 export { FormValidationException } from './exceptions/form-validation-exception'
 
@@ -51,6 +51,27 @@ export {
   BooleanInputBloc,
 } from './blocs/form/input/inputs'
 
+export { TaskHandlerBloc } from './blocs/task/handler/task-handler-bloc'
+export {
+  TaskHandlerState,
+  TaskHandlerStatus,
+} from './blocs/task/handler/task-handler-state'
+export {
+  DoTask,
+} from './blocs/task/handler/task-handler-event'
+
+export { TaskBloc } from './blocs/task/task-bloc'
+export {
+  TaskState,
+  TaskStatus,
+} from './blocs/task/task-state'
+export {
+  TaskEvent,
+  TaskEventFailure,
+  TaskEventLoading,
+  TaskEventSuccess
+} from './blocs/task/task-event'
+
 export type {
   ValidatorFunc,
   ErrorFormatterFunc,
@@ -60,7 +81,6 @@ export {
   Rule,
   validate,
   IsEmail,
-  IsRequired,
   IsSame,
   IsAlpha,
   IsAlphaParen,

@@ -33,3 +33,17 @@ export const formatBytes = (bytes: number, decimals = 2) => {
 
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
 }
+
+export const getErrorMessage = (error: unknown) => {
+  if (typeof error == 'object') {
+    if (error !== null && 'message' in error) {
+      return (error as { message: string }).message ?? 'An error occurred'
+    } else if (error !== null && 'error' in error) {
+      return (error as { error: string }).error ?? 'An error occurred'
+    } else {
+      return error?.toString() ?? 'An error occurred'
+    }
+  } else {
+    return error as string
+  }
+}

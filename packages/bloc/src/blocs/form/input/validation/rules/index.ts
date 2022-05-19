@@ -1,5 +1,4 @@
 export { IsEmail } from './email'
-export { IsRequired } from './required'
 export { IsSame } from './same'
 export { IsLength } from './length'
 export { IsIn } from './in'

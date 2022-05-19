@@ -5,15 +5,18 @@ export class Rule<T, E> {
   protected errorMessage: E
   protected validator: ValidatorFunc<T>
   protected errorFormatter?: ErrorFormatterFunc<E>
+  name?: string
 
   constructor(payload: {
     errorMessage: E
     validator: ValidatorFunc<T>
     errorFormatter?: ErrorFormatterFunc<E>
+    name?: string
   }) {
     this.errorMessage = payload.errorMessage
     this.validator = payload.validator
     this.errorFormatter = payload.errorFormatter
+    this.name = payload.name
   }
 
   public error(message: E): Rule<T, E> {

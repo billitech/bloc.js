@@ -3,7 +3,6 @@ export { Rule } from './rule'
 export { validate } from './validator'
 export {
   IsEmail,
-  IsRequired,
   IsSame,
   IsLength,
   IsIn,

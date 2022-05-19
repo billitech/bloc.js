@@ -1,5 +1,5 @@
 import { FormValidationException } from '../../../exceptions'
-import { Equatable } from '../../../equatable';
+import { Equatable } from '../../../equatable'
 
 export enum FormHandlerStatus {
   initial,
@@ -69,10 +69,6 @@ export class FormHandlerState<R> extends Equatable {
     return (
       this.status == FormHandlerStatus.failure && this.validationError != null
     )
-  }
-
-  toString() {
-    return 'FormHandlerState { status: $status, isInitial: $isInitial, isLoading: $isLoading, isSuccess: $isSuccess, isFailure: $isFailure, isValidationFailure: $isValidationFailure, error: $error, validationError: $validationError}'
   }
 
   get props(): any[] {

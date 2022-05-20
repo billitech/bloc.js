@@ -27,11 +27,13 @@ export abstract class TaskHandlerBloc<
       })
       event.task.emitSuccess(res)
     } catch (error) {
+      const errorMessage = getErrorMessage(error)
       yield this.state.copyWith({
         status: TaskHandlerStatus.failure,
-        error: getErrorMessage(error),
+        error: errorMessage,
         ref: event.task.ref,
       })
+      event.task.emitFailure(errorMessage)
     }
   }
 

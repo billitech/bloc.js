@@ -1,4 +1,4 @@
-import { Equatable } from "../../../equatable"
+import { Equatable } from '../../../equatable'
 
 export enum TaskHandlerStatus {
   initial,
@@ -7,21 +7,24 @@ export enum TaskHandlerStatus {
   success,
 }
 
-export class TaskHandlerState<R> extends Equatable {
+export class TaskHandlerState<T, R> extends Equatable {
   readonly status: TaskHandlerStatus
   readonly successData: R | null
   readonly error: string | null
   readonly ref: string | number | null
+  readonly task: T | null
 
   constructor(payload: {
     status?: TaskHandlerStatus | null
     successData?: R | null
+    task?: T | null
     error?: string | null
     ref?: string | number | null
   }) {
     super()
     this.status = payload.status ?? TaskHandlerStatus.initial
     this.successData = payload.successData ?? null
+    this.task = payload.task ?? null
     this.error = payload.error ?? null
     this.ref = payload.ref ?? null
   }
@@ -29,15 +32,17 @@ export class TaskHandlerState<R> extends Equatable {
   copyWith(payload: {
     status: TaskHandlerStatus
     successData?: R | null
+    task?: T | null
     error?: string | null
     ref?: string | number | null
-  }): TaskHandlerState<R> {
-    return new TaskHandlerState<R>({
+  }): TaskHandlerState<T, R> {
+    return new TaskHandlerState<T, R>({
       status: payload.status ?? this.status,
       successData:
         payload.successData === undefined
           ? null
           : payload.successData ?? this.successData,
+      task: payload.task === undefined ? null : payload.task ?? this.task,
       error: payload.error === undefined ? null : payload.error ?? this.error,
       ref: payload.ref === undefined ? null : payload.ref ?? this.ref,
     })

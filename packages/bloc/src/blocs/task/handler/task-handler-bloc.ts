@@ -7,7 +7,7 @@ import { getErrorMessage } from '../../../util'
 export abstract class TaskHandlerBloc<
   T extends TaskBloc<R>,
   R = TaskSuccessType<T>
-> extends Bloc<TaskHandlerState<R>, DoTask<T, R>> {
+> extends Bloc<TaskHandlerState<T, R>, DoTask<T, R>> {
   constructor() {
     super(new TaskHandlerState({ status: TaskHandlerStatus.initial }))
   }
@@ -17,6 +17,7 @@ export abstract class TaskHandlerBloc<
       yield this.state.copyWith({
         status: TaskHandlerStatus.loading,
         ref: event.task.ref,
+        task: event.task
       })
       event.task.emitLoading()
       const res = await this.handleTask(event.task)
@@ -24,6 +25,7 @@ export abstract class TaskHandlerBloc<
         status: TaskHandlerStatus.success,
         successData: res,
         ref: event.task.ref,
+        task: event.task
       })
       event.task.emitSuccess(res)
     } catch (error) {
@@ -32,6 +34,7 @@ export abstract class TaskHandlerBloc<
         status: TaskHandlerStatus.failure,
         error: errorMessage,
         ref: event.task.ref,
+        task: event.task
       })
       event.task.emitFailure(errorMessage)
     }

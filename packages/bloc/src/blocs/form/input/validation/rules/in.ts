@@ -1,8 +1,8 @@
 import { deepEqual } from 'fast-equals'
 import { Rule } from '../rule'
 
-export function IsIn(...stack: unknown[]) {
-  return new Rule<string | number, string>({
+export const IsIn = (...stack: unknown[]) =>
+  new Rule<string | number, string>({
     errorMessage: 'The {field} is invalid',
     validator: (value: string | number) => {
       for (const value2 of stack) {
@@ -14,4 +14,3 @@ export function IsIn(...stack: unknown[]) {
       return false
     },
   })
-}

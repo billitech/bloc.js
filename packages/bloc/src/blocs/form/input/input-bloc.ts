@@ -19,6 +19,7 @@ export abstract class InputBloc<T, E> extends Bloc<
   readonly initialValue: T
   readonly validationRules: Rule<T, E>[]
   readonly isRequired: boolean
+  readonly id: string
 
   constructor(payload: {
     name: string
@@ -37,6 +38,7 @@ export abstract class InputBloc<T, E> extends Bloc<
     this.title = toTitleCase(payload.name)
     this.validationRules = payload.rules ?? []
     this.isRequired = payload.isRequired ?? false
+    this.id = `${payload.name}-${(Math.random() + 1).toString(36).substring(7)}`
   }
 
   protected async *mapEventToState(event: InputEvent<T, E>) {

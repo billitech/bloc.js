@@ -9,6 +9,10 @@ export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
   FormHandlerState<R>,
   ButtonPressed<F>
 > {
+  protected emptyOnSuccess() {
+    return true
+  }
+
   constructor() {
     super(new FormHandlerState({ status: FormHandlerStatus.initial }))
   }
@@ -24,7 +28,7 @@ export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
         status: FormHandlerStatus.success,
         successData: res,
       })
-      event.form.emitFormSubmitted(FormStatus.valid, true)
+      event.form.emitFormSubmitted(FormStatus.valid, this.emptyOnSuccess())
     } catch (error) {
       if (error instanceof FormValidationException) {
         yield this.state.copyWith({

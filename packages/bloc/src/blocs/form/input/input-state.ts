@@ -1,4 +1,4 @@
-import { Equatable } from '../../../equatable';
+import { Equatable } from '../../../equatable'
 export type InputValueType<I extends InputState<any, any>> = I['value']
 export type InputErrorType<I extends InputState<any, any>> = I['error']
 
@@ -40,7 +40,7 @@ export class InputState<T, E> extends Equatable {
     initial?: boolean
   }): InputState<T, E> {
     return new InputState({
-      value: payload.value ?? this.value,
+      value: payload.value === undefined ? this.value : payload.value,
       error: payload.error === undefined ? this.error : payload.error,
       initial: payload.initial ?? this.initial,
     })

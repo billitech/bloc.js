@@ -1,11 +1,14 @@
 import { InputBloc } from '../input-bloc'
 import { Rule } from '../validation'
 
-export class StringInputBloc extends InputBloc<string, string> {
+export class StringInputBloc<T extends string = string> extends InputBloc<
+  T | "",
+  string
+> {
   constructor(payload: {
     name: string
-    value?: string
-    isRequired?: boolean,
+    value?: T
+    isRequired?: boolean
     rules?: Rule<string, string>[]
   }) {
     super({

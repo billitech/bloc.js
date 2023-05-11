@@ -1,11 +1,12 @@
 import { InputBloc } from '../input-bloc'
+import { InputState } from '../input-state'
 import { Rule } from '../validation'
 
 export class FileInputBloc extends InputBloc<File, string> {
   constructor(payload: {
     name: string
     value?: File
-    isRequired?: boolean,
+    isRequired?: boolean
     rules?: Rule<File, string>[]
   }) {
     super({
@@ -18,5 +19,16 @@ export class FileInputBloc extends InputBloc<File, string> {
 
   validateRequired(value: File): string | undefined {
     return value.size < 1 ? `${this.title} cannot be empty` : undefined
+  }
+
+  statesEqual(
+    currentState: InputState<File, string>,
+    nextState: InputState<File, string>
+  ): boolean {
+    return (
+      currentState.value === nextState.value &&
+      currentState.error === nextState.error &&
+      currentState.initial === nextState.initial
+    )
   }
 }

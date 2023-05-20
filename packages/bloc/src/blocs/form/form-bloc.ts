@@ -18,6 +18,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
   abstract get fields(): InputBloc<any, any>[]
   readonly subscriptionsContainer = new SubscriptionsContainer()
   readonly invalidFields: Array<InputBloc<any, any>> = []
+  readonly id: string
 
   constructor() {
     super(
@@ -27,7 +28,11 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
         loading: false,
       })
     )
-
+    this.id = `${(Math.random() + 1).toString(36).substring(7)}-${(
+      Math.random() + 1
+    )
+      .toString(36)
+      .substring(7)}`
     setTimeout(() => this.initializeFields(), 0.5)
   }
 

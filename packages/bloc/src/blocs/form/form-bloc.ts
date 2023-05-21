@@ -12,12 +12,10 @@ import {
 import { InputBloc } from './input/input-bloc'
 import { FormValidationException } from '../../exceptions/form-validation-exception'
 import { SubscriptionsContainer } from '../../subscriptions-container'
-import { InputState } from './input/input-state'
 
 export abstract class FormBloc extends Bloc<FormState, FormEvent> {
   abstract get fields(): InputBloc<any, any>[]
   readonly subscriptionsContainer = new SubscriptionsContainer()
-  readonly invalidFields: Array<InputBloc<any, any>> = []
   readonly id: string
 
   constructor() {
@@ -38,28 +36,20 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
 
   initializeFields() {
     this.fields.forEach((field) => {
-      this.subscriptionsContainer.add = field.subscribe(
-        (value: InputState<unknown, unknown>) => {
-          this.validateField(field)
-        }
-      )
+      this.subscriptionsContainer.add = field.subscribe(() => {
+        this.validateField(field)
+      })
     })
   }
 
   protected validateField(field: InputBloc<unknown, unknown>) {
-    const index = this.invalidFields.findIndex(
-      (field2) => field.name === field2.name
-    )
-
-    if (index > -1) {
-      this.invalidFields.splice(index, 1)
-    }
-
     if (field.state.invalid) {
       this.emitStatusChanged(FormStatus.invalid)
-      this.invalidFields.push(field)
     } else {
-      if (this.invalidFields.length < 1) {
+      const invalids = this.fields.filter(
+        (form) => form.state.invalid && form !== form
+      )
+      if (invalids.length < 1) {
         this.emitStatusChanged(FormStatus.valid)
       }
     }
@@ -144,6 +134,5 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
   dispose() {
     super.dispose()
     this.subscriptionsContainer.dispose()
-    this.invalidFields.slice(0, this.initializeFields.length)
   }
 }

@@ -134,5 +134,6 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
   dispose() {
     super.dispose()
     this.subscriptionsContainer.dispose()
+    this.fields.forEach((field) => field.dispose())
   }
 }

@@ -14,7 +14,7 @@ export abstract class TaskBloc<T> extends Bloc<TaskState<T>, TaskEvent<T>> {
     return {} as T
   }
 
-  abstract get ref(): string | number
+  abstract get id(): string | number
 
   constructor() {
     super(new TaskState())

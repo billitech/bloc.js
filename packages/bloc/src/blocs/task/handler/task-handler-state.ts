@@ -11,7 +11,7 @@ export class TaskHandlerState<T, R> extends Equatable {
   readonly status: TaskHandlerStatus
   readonly successData: R | null
   readonly error: string | null
-  readonly ref: string | number | null
+  readonly id: string | number | null
   readonly task: T | null
 
   constructor(payload: {
@@ -19,14 +19,14 @@ export class TaskHandlerState<T, R> extends Equatable {
     successData?: R | null
     task?: T | null
     error?: string | null
-    ref?: string | number | null
+    id?: string | number | null
   }) {
     super()
     this.status = payload.status ?? TaskHandlerStatus.initial
     this.successData = payload.successData ?? null
     this.task = payload.task ?? null
     this.error = payload.error ?? null
-    this.ref = payload.ref ?? null
+    this.id = payload.id ?? null
   }
 
   copyWith(payload: {
@@ -34,7 +34,7 @@ export class TaskHandlerState<T, R> extends Equatable {
     successData?: R | null
     task?: T | null
     error?: string | null
-    ref?: string | number | null
+    id?: string | number | null
   }): TaskHandlerState<T, R> {
     return new TaskHandlerState<T, R>({
       status: payload.status ?? this.status,
@@ -44,7 +44,7 @@ export class TaskHandlerState<T, R> extends Equatable {
           : payload.successData ?? this.successData,
       task: payload.task === undefined ? null : payload.task ?? this.task,
       error: payload.error === undefined ? null : payload.error ?? this.error,
-      ref: payload.ref === undefined ? null : payload.ref ?? this.ref,
+      id: payload.id === undefined ? null : payload.id ?? this.id,
     })
   }
 
@@ -67,6 +67,6 @@ export class TaskHandlerState<T, R> extends Equatable {
   }
 
   get props(): unknown[] {
-    return [this.status, this.successData, this.error, this.ref]
+    return [this.status, this.successData, this.error, this.id]
   }
 }

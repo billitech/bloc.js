@@ -16,7 +16,7 @@ export abstract class TaskHandlerBloc<
     try {
       yield this.state.copyWith({
         status: TaskHandlerStatus.loading,
-        ref: event.task.id,
+        id: event.task.id,
         task: event.task,
       })
       event.task.emitLoading()
@@ -24,7 +24,7 @@ export abstract class TaskHandlerBloc<
       yield this.state.copyWith({
         status: TaskHandlerStatus.success,
         successData: res,
-        ref: event.task.id,
+        id: event.task.id,
         task: event.task,
       })
       event.task.emitSuccess(res)
@@ -33,7 +33,7 @@ export abstract class TaskHandlerBloc<
       yield this.state.copyWith({
         status: TaskHandlerStatus.failure,
         error: errorMessage,
-        ref: event.task.id,
+        id: event.task.id,
         task: event.task,
       })
       event.task.emitFailure(errorMessage)

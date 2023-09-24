@@ -5,7 +5,7 @@ export class NumberInputBloc extends InputBloc<number, string> {
   constructor(payload: {
     name: string
     value?: number
-    isRequired?: boolean,
+    isRequired?: boolean
     rules?: Rule<number, string>[]
   }) {
     super({
@@ -17,6 +17,6 @@ export class NumberInputBloc extends InputBloc<number, string> {
   }
 
   validateRequired(value: number): string | undefined {
-    return value == NaN ? `${this.title} cannot be empty` : undefined
+    return isNaN(value) ? `${this.title} cannot be empty` : undefined
   }
 }

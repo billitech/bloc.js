@@ -4,6 +4,7 @@ import {
   defineComponent,
   Fragment,
   PropType,
+  SlotsType,
   WatchOptions,
 } from 'vue'
 import {
@@ -104,7 +105,9 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
           default: () => true,
         },
       },
-
+      slots: { Object } as SlotsType<{
+        default: (state: Readonly<BlocState<B>>) => any
+      }>,
       setup: (props, { slots }) => {
         const state = this.useBlocState(props.buildWhen)
 

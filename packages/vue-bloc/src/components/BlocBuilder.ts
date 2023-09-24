@@ -1,4 +1,4 @@
-import { createVNode, defineComponent, Fragment } from 'vue'
+import { createVNode, defineComponent, Fragment, SlotsType } from 'vue'
 import { Bloc, Transition } from '@billitech/bloc'
 import { useBlocState } from '../compositions'
 import { PropType } from 'vue'
@@ -16,7 +16,9 @@ export const BlocBuilder = defineComponent({
       default: () => true,
     },
   },
-
+  slots: { Object } as SlotsType<{
+    default: (state: Readonly<any>) => any
+  }>,
   setup(props, { slots }) {
     const state = useBlocState<any>(props.bloc, props.buildWhen)
 

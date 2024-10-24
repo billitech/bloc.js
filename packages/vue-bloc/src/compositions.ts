@@ -18,18 +18,18 @@ import {
 import { BlocContext } from './bloc-context'
 
 type BlocProvideItems<
-  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
+  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>,
 > = {
   bloc: (() => B) | B | undefined
   disposable: boolean
 }
 
 export const provideBloc = <
-  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
+  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>,
 >(
   ID: Symbol | BlocContext<B>,
   bloc: (() => B) | B | undefined,
-  disposable: boolean = false
+  disposable: boolean = false,
 ): void => {
   if (ID instanceof BlocContext) {
     ID = ID.ID
@@ -50,15 +50,15 @@ export const provideBloc = <
 }
 
 export const useBloc = <
-  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
+  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>,
 >(
-  ID: Symbol | BlocContext<B>
+  ID: Symbol | BlocContext<B>,
 ): B => {
   if (ID instanceof BlocContext) {
     ID = ID.ID
   }
 
-  const storedItem = inject(ID) as
+  const storedItem = inject(ID as symbol) as
     | Ref<BlocProvideItems | B | undefined | null>
     | B
     | undefined
@@ -80,12 +80,12 @@ export const useBloc = <
 }
 
 export const useBlocState = <
-  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
+  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>,
 >(
   bloc: B | Symbol | BlocContext<B>,
   condition: (
-    transition: Transition<BlocState<B>, BlocEvent<B>>
-  ) => boolean = () => true
+    transition: Transition<BlocState<B>, BlocEvent<B>>,
+  ) => boolean = () => true,
 ): {
   readonly value: Readonly<BlocState<B>>
 } => {
@@ -103,7 +103,7 @@ export const useBlocState = <
       if (condition(transition)) {
         state.value = transition.nextState
       }
-    }
+    },
   )
 
   onBeforeUnmount(() => {
@@ -114,24 +114,24 @@ export const useBlocState = <
 }
 
 export const watchBlocState = <
-  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
+  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>,
 >(
   bloc: B | Symbol | BlocContext<B>,
   callback: (
     newState: BlocState<B>,
-    oldState: BlocState<B> | undefined
+    oldState: BlocState<B> | undefined,
   ) => void,
-  option?: WatchOptions
+  option?: WatchOptions,
 ): void => {
   const state = useBlocState(bloc)
   watch(state, callback, option)
 }
 
 export const watchBlocTransition = <
-  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>
+  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>,
 >(
   bloc: B | Symbol | BlocContext<B>,
-  callback: (transition: Transition<BlocState<B>, BlocEvent<B>>) => void
+  callback: (transition: Transition<BlocState<B>, BlocEvent<B>>) => void,
 ): void => {
   type State = BlocState<B>
   type Event = BlocEvent<B>

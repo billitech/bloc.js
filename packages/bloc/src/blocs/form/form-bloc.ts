@@ -24,7 +24,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
         status: FormStatus.invalid,
         submitted: false,
         loading: false,
-      })
+      }),
     )
     this.id = `${(Math.random() + 1).toString(36).substring(7)}-${(
       Math.random() + 1
@@ -47,7 +47,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
       this.emitStatusChanged(FormStatus.invalid)
     } else {
       const invalids = this.fields.filter(
-        (form) => form.state.invalid && form !== form
+        (field2) => field2.state.invalid && field2 !== field,
       )
       if (invalids.length < 1) {
         this.emitStatusChanged(FormStatus.valid)

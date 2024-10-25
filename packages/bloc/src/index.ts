@@ -11,8 +11,7 @@ export { Equatable } from './equatable'
 
 export {
   FormEvent,
-  StatusChanged,
-  LoadingChanged,
+  FormLoadingChanged as LoadingChanged,
   FormSubmitted,
   ResetForm,
   ValidateForm,
@@ -30,14 +29,8 @@ export {
 } from './blocs/form/input/input-event'
 
 export { FormHandlerBloc } from './blocs/form/handler/form-handler-bloc'
-export {
-  FormHandlerState,
-  FormHandlerStatus,
-} from './blocs/form/handler/form-handler-state'
-export {
-  ButtonPressed,
-} from './blocs/form/handler/form-handler-event'
-
+export { FormHandlerState } from './blocs/form/handler/form-handler-state'
+export { SubmitForm as ButtonPressed } from './blocs/form/handler/form-handler-event'
 
 export { FormValidationException } from './exceptions/form-validation-exception'
 
@@ -49,6 +42,9 @@ export {
   NumberInputBloc,
   FileInputBloc,
   BooleanInputBloc,
+  DateInputBloc,
+  ObjectInputBloc,
+  NullableObjectInputBloc,
 } from './blocs/form/input/inputs'
 
 export { TaskHandlerBloc } from './blocs/task/handler/task-handler-bloc'
@@ -56,20 +52,15 @@ export {
   TaskHandlerState,
   TaskHandlerStatus,
 } from './blocs/task/handler/task-handler-state'
-export {
-  DoTask,
-} from './blocs/task/handler/task-handler-event'
+export { DoTask } from './blocs/task/handler/task-handler-event'
 
 export { TaskBloc } from './blocs/task/task-bloc'
-export {
-  TaskState,
-  TaskStatus,
-} from './blocs/task/task-state'
+export { TaskState, TaskStatus } from './blocs/task/task-state'
 export {
   TaskEvent,
   TaskEventFailure,
   TaskEventLoading,
-  TaskEventSuccess
+  TaskEventSuccess,
 } from './blocs/task/task-event'
 
 export type {
@@ -93,5 +84,14 @@ export {
   IsMax,
   IsMaxFileSize,
   IsRequiredIf,
-  IsRequiredUnless
+  IsRequiredUnless,
 } from './blocs/form/input/validation'
+
+export { Optional } from './optional'
+
+export {
+  JsonObject,
+  ApiResponse,
+  createApiResponse,
+  apiResponseToJson,
+} from './api'

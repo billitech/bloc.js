@@ -23,6 +23,7 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
   private readonly _transitionSubscription: Subscription
   static observer: BlocObserver = new BlocObserver()
   private emitted: boolean = false
+  public closed = false
 
   constructor(state: State) {
     this._state = new BehaviorSubject<State>(state)
@@ -55,17 +56,17 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
   public subscribe(
     next?: (value: State) => void,
     error?: (error: unknown) => void,
-    complete?: () => void
+    complete?: () => void,
   ): Subscription
   subscribe(
     next?: (value: State) => void,
     error?: (error: unknown) => void | null,
-    complete?: () => void | null
+    complete?: () => void | null,
   ): Subscription
   subscribe(
     observerOrNext?: Partial<Observer<State>> | ((value: State) => void) | null,
     error?: (error: unknown) => void,
-    complete?: () => void
+    complete?: () => void,
   ): Subscription {
     if (typeof observerOrNext === 'function') {
       return this._state.subscribe({
@@ -91,7 +92,7 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
   }
 
   protected transformTransitions(
-    transitions: Observable<Transition<State, Event>>
+    transitions: Observable<Transition<State, Event>>,
   ): Observable<Transition<State, Event>> {
     return transitions
   }
@@ -104,10 +105,10 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
           return from(this.mapEventToState(event)).pipe(
             map((state) => {
               return new Transition(this.state, event, state)
-            })
+            }),
           )
-        })
-      )
+        }),
+      ),
     ).subscribe((transition: Transition<State, Event>) => {
       if (
         this.emitted === false ||
@@ -130,6 +131,7 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
   }
 
   dispose() {
+    this.closed = true
     this._state.complete()
     this._transition.complete()
     this._event.complete()

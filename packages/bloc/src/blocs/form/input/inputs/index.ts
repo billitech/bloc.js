@@ -1,5 +1,8 @@
-export { StringInputBloc } from "./string-input-bloc";
-export { EmailInputBloc } from "./email-input-bloc";
-export { NumberInputBloc } from "./number-input-bloc";
-export { FileInputBloc } from "./file-input-bloc";
-export { BooleanInputBloc } from "./boolean-input-bloc";
+export { StringInputBloc } from './string-input-bloc'
+export { EmailInputBloc } from './email-input-bloc'
+export { NumberInputBloc } from './number-input-bloc'
+export { FileInputBloc } from './file-input-bloc'
+export { BooleanInputBloc } from './boolean-input-bloc'
+export { DateInputBloc } from './date-input-bloc'
+export { ObjectInputBloc } from './object-input-bloc'
+export { NullableObjectInputBloc } from './nullable-object-input-bloc'

@@ -2,16 +2,18 @@ import { FormState, FormStatus } from './form-state'
 import { Bloc } from '../../bloc'
 import {
   FormEvent,
-  StatusChanged,
   ResetForm,
   FormValidationError,
   FormSubmitted,
   ValidateForm,
-  LoadingChanged,
+  FormLoadingChanged,
+  FormValidChanged,
 } from './form-event'
 import { InputBloc } from './input/input-bloc'
 import { FormValidationException } from '../../exceptions/form-validation-exception'
 import { SubscriptionsContainer } from '../../subscriptions-container'
+import { debounceTime, distinct } from 'rxjs'
+import { Optional } from '../../optional'
 
 export abstract class FormBloc extends Bloc<FormState, FormEvent> {
   abstract get fields(): InputBloc<any, any>[]
@@ -21,9 +23,9 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
   constructor() {
     super(
       new FormState({
-        status: FormStatus.invalid,
-        submitted: false,
-        loading: false,
+        isValid: false,
+        isLoading: false,
+        isSubmitted: false,
       }),
     )
     this.id = `${(Math.random() + 1).toString(36).substring(7)}-${(
@@ -36,39 +38,41 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
 
   initializeFields() {
     this.fields.forEach((field) => {
-      this.subscriptionsContainer.add = field.subscribe(() => {
-        this.validateField(field)
-      })
+      this.subscriptionsContainer.add = field.stream
+        .pipe(debounceTime(500), distinct())
+        .subscribe((_) => {
+          this.validateField(field)
+        })
     })
   }
 
   protected validateField(field: InputBloc<unknown, unknown>) {
-    if (field.state.invalid) {
-      this.emitStatusChanged(FormStatus.invalid)
+    if (field.state.isInvalid) {
+      this.emitValidChanged(false)
     } else {
       const invalids = this.fields.filter(
-        (field2) => field2.state.invalid && field2 !== field,
+        (field2) => field2.state.isInvalid && field2 !== field,
       )
-      if (invalids.length < 1) {
-        this.emitStatusChanged(FormStatus.valid)
+      if (invalids.length == 0) {
+        this.emitValidChanged(true)
       }
     }
   }
 
   protected async *mapEventToState(event: FormEvent) {
-    if (event instanceof StatusChanged) {
+    if (event instanceof FormValidChanged) {
       yield this.state.copyWith({
-        status: event.status,
+        isValid: Optional.value(event.isValid),
       })
-    } else if (event instanceof LoadingChanged) {
+    } else if (event instanceof FormLoadingChanged) {
       yield this.state.copyWith({
-        loading: event.loading,
+        isLoading: Optional.value(event.loading),
       })
     } else if (event instanceof FormSubmitted) {
       yield this.state.copyWith({
-        status: event.status,
-        submitted: true,
-        loading: false,
+        isValid: Optional.value(event.response.status),
+        isSubmitted: Optional.value(true),
+        isLoading: Optional.value(false),
       })
       if (event.resetForm) {
         this.resetForm()
@@ -80,8 +84,8 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
     } else if (event instanceof FormValidationError) {
       this.onValidationError(event.error)
       yield this.state.copyWith({
-        status: FormStatus.valid,
-        loading: false,
+        isValid: Optional.value(false),
+        isLoading: Optional.value(false),
       })
     }
   }
@@ -94,15 +98,19 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
 
   protected validateForm() {
     this.fields.forEach((field) => {
-      field.emitInputUnFocused()
+      field.emitInputUnFocused({ forceError: true })
     })
   }
 
   protected onValidationError(error: FormValidationException) {
-    for (const key in error.error) {
+    for (const key in error.errors) {
       const field = this.fields.find((field) => field.name === key)
-      if (field) {
-        field.emitInputValidationError(error.error[key])
+      if (
+        field &&
+        error.errors[key] !== null &&
+        error.errors[key] !== undefined
+      ) {
+        field.emitInputValidationError(error.errors[key])
       }
     }
   }
@@ -115,16 +123,18 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
     this.add(new ValidateForm())
   }
 
-  public emitStatusChanged(status: FormStatus) {
-    this.add(new StatusChanged(status))
+  public emitValidChanged(isValid: boolean) {
+    this.add(new FormValidChanged(isValid))
   }
 
   public emitLoadingChanged(loading: boolean) {
-    this.add(new LoadingChanged(loading))
+    this.add(new FormLoadingChanged(loading))
   }
 
-  public emitFormSubmitted(status: FormStatus, resetForm: boolean) {
-    this.add(new FormSubmitted(status, resetForm))
+  public emitFormSubmitted(
+    payload: ConstructorParameters<typeof FormSubmitted>[0],
+  ) {
+    this.add(new FormSubmitted(payload))
   }
 
   public emitResetForm() {

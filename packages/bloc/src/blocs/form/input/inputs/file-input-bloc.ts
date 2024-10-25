@@ -23,12 +23,12 @@ export class FileInputBloc extends InputBloc<File, string> {
 
   statesEqual(
     currentState: InputState<File, string>,
-    nextState: InputState<File, string>
+    nextState: InputState<File, string>,
   ): boolean {
     return (
       currentState.value === nextState.value &&
       currentState.error === nextState.error &&
-      currentState.initial === nextState.initial
+      currentState.isPure === nextState.isPure
     )
   }
 }

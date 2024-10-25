@@ -1,17 +1,17 @@
+import { ApiResponse } from '../../api'
 import { FormValidationException } from '../../exceptions/form-validation-exception'
-import { FormStatus } from './form-state'
 
 export abstract class FormEvent {}
 
-export class StatusChanged extends FormEvent {
-  readonly status: FormStatus
-  constructor(status: FormStatus) {
+export class FormValidChanged extends FormEvent {
+  readonly isValid: boolean
+  constructor(isValid: boolean) {
     super()
-    this.status = status
+    this.isValid = isValid
   }
 }
 
-export class LoadingChanged extends FormEvent {
+export class FormLoadingChanged extends FormEvent {
   readonly loading: boolean
   constructor(loading: boolean) {
     super()
@@ -20,19 +20,20 @@ export class LoadingChanged extends FormEvent {
 }
 
 export class FormSubmitted extends FormEvent {
-  readonly status: FormStatus
+  readonly response: ApiResponse<any>
   readonly resetForm: boolean
 
-  constructor(status: FormStatus, resetForm: boolean = false) {
+  constructor(payload: { response: ApiResponse<any>; resetForm?: boolean }) {
     super()
-    this.status = status
-    this.resetForm = resetForm
+    this.response = payload.response
+    this.resetForm = payload.resetForm ?? false
   }
 }
 
 export class ValidateForm extends FormEvent {}
 
 export class ResetForm extends FormEvent {}
+
 export class FormValidationError extends FormEvent {
   readonly error: FormValidationException
 

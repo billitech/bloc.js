@@ -6,9 +6,11 @@ import {
   InputUnFocused,
   InputValidationError,
   ResetInput,
+  ValidateInput,
 } from './input-event'
 import { Rule, validate } from './validation'
 import { toTitleCase } from '../../../util'
+import { Optional } from '../../../optional'
 
 export abstract class InputBloc<T, E> extends Bloc<
   InputState<T, E>,
@@ -24,14 +26,17 @@ export abstract class InputBloc<T, E> extends Bloc<
   constructor(payload: {
     name: string
     value: T
+    error?: E | null
     isRequired?: boolean
     rules?: Rule<T, E>[]
   }) {
     super(
       new InputState({
         value: payload.value,
-        initial: true,
-      })
+        isPure: true,
+        forceError: false,
+        error: payload.error,
+      }),
     )
     this.initialValue = payload.value
     this.name = payload.name
@@ -44,24 +49,41 @@ export abstract class InputBloc<T, E> extends Bloc<
   protected async *mapEventToState(event: InputEvent<T, E>) {
     if (event instanceof InputChanged) {
       yield this.state.copyWith({
-        value: event.value,
-        initial: false,
-        error: this.validate(event.value) ?? null,
+        value: Optional.value(event.value),
+        isPure: Optional.value(false),
+        forceError: Optional.value(false),
+        error: Optional.value(this.validate(event.value)),
       })
     } else if (event instanceof InputUnFocused) {
       yield this.state.copyWith({
-        initial: false,
-        error: this.validate(this.state.value) ?? null,
+        isPure: Optional.value(false),
+        forceError: Optional.value(event.forceError),
+        error: Optional.value(this.validate(this.state.value)),
+      })
+    } else if (event instanceof ValidateInput) {
+      yield this.state.copyWith({
+        isPure: Optional.value(this.state.isPure),
+        forceError: Optional.value(true),
+        error: Optional.value(this.validate(this.state.value)),
       })
     } else if (event instanceof ResetInput) {
       yield this.state.copyWith({
-        initial: true,
-        value: this.initialValue,
+        isPure: Optional.value(event.resetIsPure ? true : this.state.isPure),
+        forceError: Optional.value(
+          event.resetForceError ? false : this.state.forceError,
+        ),
+        error: event.resetError
+          ? Optional.value(this.validate(this.state.value))
+          : Optional.value(this.state.error),
+        value: Optional.value(
+          event.resetValue ? this.initialValue : this.state.value,
+        ),
       })
     } else if (event instanceof InputValidationError) {
       yield this.state.copyWith({
-        error: event.error,
-        initial: false,
+        error: Optional.value(event.error),
+        isPure: Optional.value(false),
+        forceError: Optional.value(true),
       })
     }
   }
@@ -72,12 +94,16 @@ export abstract class InputBloc<T, E> extends Bloc<
     this.add(new InputChanged<T>(value))
   }
 
-  emitInputUnFocused() {
-    this.add(new InputUnFocused())
+  emitInputUnFocused(payload: ConstructorParameters<typeof InputUnFocused>[0]) {
+    this.add(new InputUnFocused(payload))
   }
 
-  emitResetInput() {
-    this.add(new ResetInput())
+  emitResetInput(payload: ConstructorParameters<typeof ResetInput>[0]) {
+    this.add(new ResetInput(payload))
+  }
+
+  emitValidateInput(payload: ConstructorParameters<typeof ValidateInput>[0]) {
+    this.add(new ValidateInput(payload))
   }
 
   emitInputValidationError(error: E) {

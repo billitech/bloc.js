@@ -1,75 +1,79 @@
+import { ApiResponse } from '../../../api'
 import { Bloc } from '../../../bloc'
 import { FormValidationException } from '../../../exceptions/form-validation-exception'
+import { Optional } from '../../../optional'
+import { getErrorMessage } from '../../../util'
 import { FormBloc } from '../form-bloc'
-import { FormStatus } from '../form-state'
-import { ButtonPressed } from './form-handler-event'
-import { FormHandlerState, FormHandlerStatus } from './form-handler-state'
+import { SubmitForm } from './form-handler-event'
+import { FormHandlerState } from './form-handler-state'
 
 export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
   FormHandlerState<R>,
-  ButtonPressed<F>
+  SubmitForm<F>
 > {
   constructor(readonly resetOnSuccess = false) {
-    super(new FormHandlerState({ status: FormHandlerStatus.initial }))
+    super(new FormHandlerState())
   }
 
-  protected async *mapEventToState(event: ButtonPressed<F>) {
+  protected async *mapEventToState(event: SubmitForm<F>) {
     try {
       yield this.state.copyWith({
-        status: FormHandlerStatus.loading,
+        isLoading: Optional.value(true),
       })
       event.form.emitLoadingChanged(true)
-      const res = await this.handleFormSubmission(event.form)
+
+      const resp = await this.handleFormSubmission(event.form)
       yield this.state.copyWith({
-        status: FormHandlerStatus.success,
-        successData: res,
+        isLoading: Optional.value(false),
+        response: Optional.value(resp),
       })
-      event.form.emitFormSubmitted(FormStatus.valid, this.resetOnSuccess)
+      if (!event.form.closed) {
+        event.form.emitFormSubmitted({
+          response: resp,
+          resetForm: resp.status ? this.resetOnSuccess : false,
+        })
+      }
     } catch (error) {
       if (error instanceof FormValidationException) {
         yield this.state.copyWith({
-          status: FormHandlerStatus.failure,
-          error: error.message,
-          validationError: error,
+          isLoading: Optional.value(false),
+          response: Optional.value(error.apiResponse<R>()),
         })
 
-        event.form.emitValidationError(error)
-      } else if (typeof error == 'object') {
-        if (error !== null && 'message' in error) {
-          yield this.state.copyWith({
-            status: FormHandlerStatus.failure,
-            validationError: null,
-            error:
-              (error as { message: string }).message ?? 'An error occurred',
-          })
-        } else if (error !== null && 'error' in error) {
-          yield this.state.copyWith({
-            status: FormHandlerStatus.failure,
-            validationError: null,
-            error: (error as { error: string }).error ?? 'An error occurred',
-          })
-        } else {
-          yield this.state.copyWith({
-            status: FormHandlerStatus.failure,
-            error: error?.toString() ?? 'An error occurred',
-            validationError: null,
+        if (!event.form.closed) {
+          event.form.emitValidationError(error)
+        }
+      } else {
+        const resp = this.getUnknownErrorResponse(error)
+        yield this.state.copyWith({
+          isLoading: Optional.value(false),
+          response: Optional.value(resp),
+        })
+        if (!event.form.closed) {
+          event.form.emitFormSubmitted({
+            response: resp,
+            resetForm: false,
           })
         }
-        event.form.emitLoadingChanged(false)
-      } else {
-        yield this.state.copyWith({
-          status: FormHandlerStatus.failure,
-          error: error as string,
-          validationError: null,
-        })
-        event.form.emitLoadingChanged(false)
       }
     }
   }
 
-  abstract handleFormSubmission(form: F): Promise<R> | R
+  abstract handleFormSubmission(
+    form: F,
+  ): Promise<ApiResponse<R>> | ApiResponse<R>
 
-  emitButtonPressed(form: F) {
-    this.add(new ButtonPressed(form))
+  emitSubmitForm(form: F): void {
+    this.add(new SubmitForm(form))
+  }
+
+  protected getUnknownErrorResponse(error: unknown): ApiResponse<R> {
+    return {
+      status: false,
+      responseCode: '',
+      message: getErrorMessage(error),
+      data: null,
+      errors: null,
+    }
   }
 }

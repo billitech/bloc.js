@@ -1,5 +1,5 @@
 export const validateRequired = (
-  value: string | null | number | undefined | File
+  value: string | null | number | undefined | File,
 ) => {
   if (value == null || value == undefined) {
     return false

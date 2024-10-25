@@ -1,4 +1,5 @@
 import { Equatable } from '../../equatable'
+import { Optional } from '../../optional'
 
 export enum FormStatus {
   valid,
@@ -6,42 +7,47 @@ export enum FormStatus {
 }
 
 export class FormState extends Equatable {
-  readonly status: FormStatus
-  readonly loading: boolean
-  readonly submitted: boolean
+  readonly isValid: boolean
+  readonly isLoading: boolean
+  readonly isSubmitted: boolean
 
   constructor(payload: {
-    status: FormStatus
-    submitted: boolean
-    loading: boolean
+    isValid: boolean
+    isSubmitted: boolean
+    isLoading: boolean
   }) {
     super()
-    this.status = payload.status
-    this.submitted = payload.submitted
-    this.loading = payload.loading
+    this.isValid = payload.isValid
+    this.isSubmitted = payload.isSubmitted
+    this.isLoading = payload.isLoading
   }
 
   copyWith(payload: {
-    status?: FormStatus
-    submitted?: boolean
-    loading?: boolean
+    isValid?: Optional<boolean>
+    isSubmitted?: Optional<boolean>
+    isLoading?: Optional<boolean>
   }) {
     return new FormState({
-      status: payload.status ?? this.status,
-      submitted: payload.submitted ?? this.submitted,
-      loading: payload.loading ?? this.loading,
+      isValid:
+        payload.isValid && payload.isValid.isValid
+          ? payload.isValid.value
+          : this.isValid,
+      isSubmitted:
+        payload.isSubmitted && payload.isSubmitted.isValid
+          ? payload.isSubmitted.value
+          : this.isSubmitted,
+      isLoading:
+        payload.isLoading && payload.isLoading.isValid
+          ? payload.isLoading.value
+          : this.isLoading,
     })
   }
 
-  get valid(): boolean {
-    return this.status === FormStatus.valid
-  }
-
-  get invalid(): boolean {
-    return this.status === FormStatus.invalid
+  get isNotValid(): boolean {
+    return !this.isValid
   }
 
   get props(): unknown[] {
-    return [this.status, this.loading, this.submitted]
+    return [this.isValid, this.isLoading, this.isSubmitted]
   }
 }

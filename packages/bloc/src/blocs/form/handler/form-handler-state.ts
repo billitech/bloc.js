@@ -1,77 +1,81 @@
-import { FormValidationException } from '../../../exceptions'
-import { Equatable } from '../../../equatable'
+import { ApiResponse } from '../../../api'
+import { Optional } from '../../../optional'
 
-export enum FormHandlerStatus {
-  initial,
-  loading,
-  failure,
-  success,
+enum FormHandlerStatus {
+  Initial = 'initial',
+  Loading = 'loading',
+  Failure = 'failure',
+  Success = 'success',
 }
 
-export class FormHandlerState<R> extends Equatable {
-  readonly status: FormHandlerStatus
-  readonly successData?: R
-  readonly error?: string
-  readonly validationError?: FormValidationException
+export class FormHandlerState<R> {
+  public isLoading: boolean
+  public response?: ApiResponse<R>
 
-  constructor(payload: {
-    status: FormHandlerStatus
-    successData?: R
-    error?: string
-    validationError?: FormValidationException
-  }) {
-    super()
-    this.status = payload.status
-    this.successData = payload.successData
-    this.error = payload.error
-    this.validationError = payload.validationError
+  constructor({
+    isLoading = false,
+    response,
+  }: { isLoading?: boolean; response?: ApiResponse<R> } = {}) {
+    this.isLoading = isLoading
+    this.response = response
   }
 
-  copyWith(payload: {
-    status: FormHandlerStatus
-    successData?: R | null
-    error?: string | null
-    validationError?: FormValidationException | null
+  copyWith({
+    isLoading,
+    response,
+  }: {
+    isLoading?: Optional<boolean>
+    response?: Optional<ApiResponse<R> | undefined>
   }): FormHandlerState<R> {
     return new FormHandlerState<R>({
-      status: payload.status ?? this.status,
-      successData:
-        payload.successData === null
-          ? undefined
-          : payload.successData ?? this.successData,
-      error: payload.error === null ? undefined : payload.error ?? this.error,
-      validationError:
-        payload.validationError === null
-          ? undefined
-          : payload.validationError ?? this.validationError,
+      isLoading:
+        isLoading && isLoading.isValid ? isLoading.value : this.isLoading,
+      response: response && response.isValid ? response.value : this.response,
     })
   }
 
   get isInitial(): boolean {
-    return this.status === FormHandlerStatus.initial
-  }
-
-  get isLoading(): boolean {
-    return this.status === FormHandlerStatus.loading
+    return this.response === undefined && !this.isLoading
   }
 
   get isSuccess(): boolean {
     return (
-      this.status == FormHandlerStatus.success && this.successData !== undefined
+      this.response !== undefined &&
+      !this.isLoading &&
+      this.response?.status === true
     )
   }
 
   get isFailure(): boolean {
-    return this.status == FormHandlerStatus.failure && this.error !== undefined
+    return (
+      this.response !== undefined &&
+      !this.isLoading &&
+      this.response?.status !== true
+    )
   }
 
   get isValidationFailure(): boolean {
     return (
-      this.status == FormHandlerStatus.failure && this.validationError != null
+      this.isFailure &&
+      this.response?.errors !== undefined &&
+      Object.keys(this.response.errors ?? {}).length > 0
     )
   }
 
+  get status(): FormHandlerStatus {
+    if (this.isLoading) {
+      return FormHandlerStatus.Loading
+    }
+    if (this.isSuccess) {
+      return FormHandlerStatus.Success
+    }
+    if (this.isFailure) {
+      return FormHandlerStatus.Failure
+    }
+    return FormHandlerStatus.Initial
+  }
+
   get props(): any[] {
-    return [this.status, this.successData, this.error, this.validationError]
+    return [this.isLoading, this.response]
   }
 }

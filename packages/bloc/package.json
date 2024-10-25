@@ -1,6 +1,6 @@
 {
   "name": "@billitech/bloc",
-  "version": "0.0.49",
+  "version": "0.1.0",
   "description": "A predictable state management library that helps implement the BLoC design pattern in JavaScript",
   "keywords": [
     "state-management",

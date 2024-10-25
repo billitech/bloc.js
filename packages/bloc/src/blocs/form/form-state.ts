@@ -1,11 +1,6 @@
 import { Equatable } from '../../equatable'
 import { Optional } from '../../optional'
 
-export enum FormStatus {
-  valid,
-  invalid,
-}
-
 export class FormState extends Equatable {
   readonly isValid: boolean
   readonly isLoading: boolean

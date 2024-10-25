@@ -98,7 +98,7 @@ export abstract class InputBloc<T, E> extends Bloc<
     this.add(new InputUnFocused(payload))
   }
 
-  emitResetInput(payload: ConstructorParameters<typeof ResetInput>[0]) {
+  emitResetInput(payload?: ConstructorParameters<typeof ResetInput>[0]) {
     this.add(new ResetInput(payload))
   }
 

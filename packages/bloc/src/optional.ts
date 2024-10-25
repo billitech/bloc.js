@@ -15,4 +15,8 @@ export class Optional<T> {
   static null<T>(): Optional<T> {
     return new Optional()
   }
+
+  public decideValue(other: T): T {
+    return this.value && this.isValid ? this.value : other
+  }
 }

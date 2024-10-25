@@ -1,62 +1,81 @@
-import { Equatable } from "../../equatable"
+import { ApiResponse } from '../../api'
+import { Optional } from '../../optional'
 
 export enum TaskStatus {
-  initial,
-  loading,
-  failure,
-  success,
+  Initial = 'initial',
+  Loading = 'loading',
+  Failure = 'failure',
+  Success = 'success',
 }
 
-export class TaskState<T> extends Equatable {
-  readonly status: TaskStatus
-  readonly successData: T | null
-  readonly error: string | null
+export class TaskState<R> {
+  readonly isLoading: boolean
+  readonly response?: ApiResponse<R>
 
-  constructor(payload?: {
-    status?: TaskStatus | null
-    successData?: T | null
-    error?: string | null
-  }) {
-    super()
-    this.status = payload?.status ?? TaskStatus.initial
-    this.successData = payload?.successData ?? null
-    this.error = payload?.error ?? null
+  constructor({
+    isLoading = false,
+    response,
+  }: { isLoading?: boolean; response?: ApiResponse<R> } = {}) {
+    this.isLoading = isLoading
+    this.response = response
   }
 
-  copyWith(payload: {
-    status: TaskStatus
-    successData?: T | null
-    error?: string | null
-  }): TaskState<T> {
-    return new TaskState<T>({
-      status: payload.status ?? this.status,
-      successData:
-        payload.successData === undefined
-          ? null
-          : payload.successData ?? this.successData,
-      error: payload.error === undefined ? null : payload.error ?? this.error,
+  copyWith({
+    isLoading,
+    response,
+  }: {
+    isLoading?: Optional<boolean>
+    response?: Optional<ApiResponse<R> | undefined>
+  }): TaskState<R> {
+    return new TaskState<R>({
+      isLoading:
+        isLoading && isLoading.isValid ? isLoading.value : this.isLoading,
+      response: response && response.isValid ? response.value : this.response,
     })
   }
 
   get isInitial(): boolean {
-    return this.status === TaskStatus.initial
-  }
-
-  get isLoading(): boolean {
-    return this.status === TaskStatus.loading
+    return this.response === undefined && !this.isLoading
   }
 
   get isSuccess(): boolean {
     return (
-      this.status == TaskStatus.success && this.successData !== undefined
+      this.response !== undefined &&
+      !this.isLoading &&
+      this.response?.status === true
     )
   }
 
   get isFailure(): boolean {
-    return this.status == TaskStatus.failure && this.error !== undefined
+    return (
+      this.response !== undefined &&
+      !this.isLoading &&
+      this.response?.status !== true
+    )
   }
 
-  get props(): unknown[] {
-    return [this.status, this.successData, this.error]
+  get isValidationFailure(): boolean {
+    return (
+      this.isFailure &&
+      this.response?.errors !== undefined &&
+      Object.keys(this.response.errors ?? {}).length > 0
+    )
+  }
+
+  get status(): TaskStatus {
+    if (this.isLoading) {
+      return TaskStatus.Loading
+    }
+    if (this.isSuccess) {
+      return TaskStatus.Success
+    }
+    if (this.isFailure) {
+      return TaskStatus.Failure
+    }
+    return TaskStatus.Initial
+  }
+
+  get props(): any[] {
+    return [this.isLoading, this.response]
   }
 }

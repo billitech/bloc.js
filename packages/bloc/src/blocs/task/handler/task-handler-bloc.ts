@@ -1,48 +1,76 @@
 import { DoTask } from './task-handler-event'
-import { TaskHandlerState, TaskHandlerStatus } from './task-handler-state'
+import { TaskHandlerState } from './task-handler-state'
 import { Bloc } from '../../../bloc'
-import { TaskBloc, TaskSuccessType } from '../task-bloc'
+import { TaskBloc, TaskResponseType } from '../task-bloc'
 import { getErrorMessage } from '../../../util'
+import { ApiResponse } from '../../../api'
+import { Optional } from '../../../optional'
+import { FormValidationException } from '../../../exceptions'
 
 export abstract class TaskHandlerBloc<
   T extends TaskBloc<R>,
-  R = TaskSuccessType<T>
+  R = TaskResponseType<T>,
 > extends Bloc<TaskHandlerState<T, R>, DoTask<T, R>> {
   constructor() {
-    super(new TaskHandlerState({ status: TaskHandlerStatus.initial }))
+    super(new TaskHandlerState())
   }
 
   protected async *mapEventToState(event: DoTask<T, R>) {
     try {
       yield this.state.copyWith({
-        status: TaskHandlerStatus.loading,
-        id: event.task.id,
-        task: event.task,
+        isLoading: Optional.value(true),
+        task: Optional.value(event.task),
       })
       event.task.emitLoading()
-      const res = await this.handleTask(event.task)
+      const resp = await this.handleTask(event.task)
       yield this.state.copyWith({
-        status: TaskHandlerStatus.success,
-        successData: res,
-        id: event.task.id,
-        task: event.task,
+        isLoading: Optional.value(false),
+        task: Optional.value(event.task),
+        response: Optional.value(resp),
       })
-      event.task.emitSuccess(res)
+      if (!event.task.closed) {
+        event.task.emitSuccess(resp)
+      }
     } catch (error) {
-      const errorMessage = getErrorMessage(error)
-      yield this.state.copyWith({
-        status: TaskHandlerStatus.failure,
-        error: errorMessage,
-        id: event.task.id,
-        task: event.task,
-      })
-      event.task.emitFailure(errorMessage)
+      if (error instanceof FormValidationException) {
+        const resp = error.apiResponse<R>()
+        yield this.state.copyWith({
+          isLoading: Optional.value(false),
+          task: Optional.value(event.task),
+          response: Optional.value(resp),
+        })
+        if (!event.task.closed) {
+          event.task.emitFailure(resp)
+        }
+      } else {
+        const resp = this.getUnknownErrorResponse(error)
+        yield this.state.copyWith({
+          isLoading: Optional.value(false),
+          task: Optional.value(event.task),
+          response: Optional.value(resp),
+        })
+        if (!event.task.closed) {
+          if (!event.task.closed) {
+            event.task.emitFailure(resp)
+          }
+        }
+      }
     }
   }
 
-  abstract handleTask(task: T): Promise<R> | R
+  abstract handleTask(task: T): Promise<ApiResponse<R>> | ApiResponse<R>
 
   emitDoTask(task: T) {
     this.add(new DoTask(task))
+  }
+
+  protected getUnknownErrorResponse(error: unknown): ApiResponse<R> {
+    return {
+      status: false,
+      responseCode: '',
+      message: getErrorMessage(error),
+      data: null,
+      errors: null,
+    }
   }
 }

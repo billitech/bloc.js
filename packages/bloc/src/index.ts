@@ -3,7 +3,7 @@ export { Transition } from './transition'
 export { BlocObserver } from './bloc-observer'
 
 export { FormBloc } from './blocs/form/form-bloc'
-export { FormState, FormStatus } from './blocs/form/form-state'
+export { FormState } from './blocs/form/form-state'
 
 export { Cubit, CubitEvent } from './cubit'
 
@@ -29,7 +29,10 @@ export {
 } from './blocs/form/input/input-event'
 
 export { FormHandlerBloc } from './blocs/form/handler/form-handler-bloc'
-export { FormHandlerState } from './blocs/form/handler/form-handler-state'
+export {
+  FormHandlerState,
+  FormHandlerStatus,
+} from './blocs/form/handler/form-handler-state'
 export { SubmitForm as ButtonPressed } from './blocs/form/handler/form-handler-event'
 
 export { FormValidationException } from './exceptions/form-validation-exception'

@@ -32,14 +32,12 @@ export class ResetInput extends InputEvent<any, any> {
       resetError,
       resetIsPure,
       resetForceError,
-    }:
-      | {
-          resetValue?: boolean
-          resetError?: boolean
-          resetIsPure?: boolean
-          resetForceError?: boolean
-        }
-      | undefined = {
+    }: {
+      resetValue?: boolean
+      resetError?: boolean
+      resetIsPure?: boolean
+      resetForceError?: boolean
+    } = {
       resetValue: true,
       resetError: true,
       resetIsPure: true,
@@ -58,10 +56,7 @@ export class ValidateInput<E> extends InputEvent<any, E> {
   readonly forceDirty?: boolean
   readonly forceError?: boolean
   constructor(
-    {
-      forceDirty,
-      forceError,
-    }: { forceDirty: boolean; forceError: boolean } | undefined = {
+    { forceDirty, forceError }: { forceDirty: boolean; forceError: boolean } = {
       forceDirty: false,
       forceError: false,
     },

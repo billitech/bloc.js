@@ -1,4 +1,4 @@
-import { FormState, FormStatus } from './form-state'
+import { FormState } from './form-state'
 import { Bloc } from '../../bloc'
 import {
   FormEvent,

@@ -1,17 +1,19 @@
+import { ApiResponse } from '../../api'
 import { Bloc } from '../../bloc'
+import { Optional } from '../../optional'
 import {
   TaskEvent,
   TaskEventFailure,
   TaskEventLoading,
   TaskEventSuccess,
 } from './task-event'
-import { TaskState, TaskStatus } from './task-state'
+import { TaskState } from './task-state'
 
-export type TaskSuccessType<T extends TaskBloc<any>> = T['___successType']
+export type TaskResponseType<R extends TaskBloc<any>> = R['___responseType']
 
-export abstract class TaskBloc<T> extends Bloc<TaskState<T>, TaskEvent<T>> {
-  get ___successType(): T {
-    return {} as T
+export abstract class TaskBloc<R> extends Bloc<TaskState<R>, TaskEvent<R>> {
+  get ___responseType(): R {
+    return {} as R
   }
 
   abstract get id(): string | number
@@ -20,20 +22,20 @@ export abstract class TaskBloc<T> extends Bloc<TaskState<T>, TaskEvent<T>> {
     super(new TaskState())
   }
 
-  protected async *mapEventToState(event: TaskEvent<T>) {
+  protected async *mapEventToState(event: TaskEvent<R>) {
     if (event instanceof TaskEventLoading) {
       yield this.state.copyWith({
-        status: TaskStatus.loading,
+        isLoading: Optional.value(true),
       })
     } else if (event instanceof TaskEventSuccess) {
       yield this.state.copyWith({
-        status: TaskStatus.success,
-        successData: event.successData,
+        isLoading: Optional.value(false),
+        response: Optional.value(event.response),
       })
     } else if (event instanceof TaskEventFailure) {
       yield this.state.copyWith({
-        status: TaskStatus.failure,
-        error: event.error,
+        isLoading: Optional.value(false),
+        response: Optional.value(event.response),
       })
     }
   }
@@ -42,11 +44,11 @@ export abstract class TaskBloc<T> extends Bloc<TaskState<T>, TaskEvent<T>> {
     this.add(new TaskEventLoading())
   }
 
-  emitSuccess(successData: T) {
-    this.add(new TaskEventSuccess(successData))
+  emitSuccess(response: ApiResponse<R>) {
+    this.add(new TaskEventSuccess(response))
   }
 
-  emitFailure(error: string) {
-    this.add(new TaskEventFailure(error))
+  emitFailure(response: ApiResponse<R>) {
+    this.add(new TaskEventFailure(response))
   }
 }

@@ -1,7 +1,7 @@
 import { ApiResponse } from '../../../api'
 import { Optional } from '../../../optional'
 
-enum FormHandlerStatus {
+export enum FormHandlerStatus {
   Initial = 'initial',
   Loading = 'loading',
   Failure = 'failure',
@@ -9,8 +9,8 @@ enum FormHandlerStatus {
 }
 
 export class FormHandlerState<R> {
-  public isLoading: boolean
-  public response?: ApiResponse<R>
+  readonly isLoading: boolean
+  readonly response?: ApiResponse<R>
 
   constructor({
     isLoading = false,

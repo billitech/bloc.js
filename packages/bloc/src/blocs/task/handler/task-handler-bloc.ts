@@ -2,7 +2,12 @@ import { DoTask } from './task-handler-event'
 import { TaskHandlerState } from './task-handler-state'
 import { Bloc } from '../../../bloc'
 import { TaskBloc, TaskResponseType } from '../task-bloc'
-import { getErrorMessage } from '../../../util'
+import {
+  getErrorErrors,
+  getErrorMessage,
+  getErrorResponseCode,
+  getErrorStatusCode,
+} from '../../../util'
 import { ApiResponse } from '../../../api'
 import { Optional } from '../../../optional'
 import { FormValidationException } from '../../../exceptions'
@@ -67,10 +72,11 @@ export abstract class TaskHandlerBloc<
   protected getUnknownErrorResponse(error: unknown): ApiResponse<R> {
     return {
       status: false,
-      responseCode: '',
+      responseCode: getErrorResponseCode(error),
+      statusCode: getErrorStatusCode(error),
       message: getErrorMessage(error),
+      errors: getErrorErrors(error),
       data: null,
-      errors: null,
     }
   }
 }

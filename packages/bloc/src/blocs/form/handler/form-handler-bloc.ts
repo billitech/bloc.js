@@ -2,7 +2,12 @@ import { ApiResponse } from '../../../api'
 import { Bloc } from '../../../bloc'
 import { FormValidationException } from '../../../exceptions/form-validation-exception'
 import { Optional } from '../../../optional'
-import { getErrorMessage } from '../../../util'
+import {
+  getErrorErrors,
+  getErrorMessage,
+  getErrorResponseCode,
+  getErrorStatusCode,
+} from '../../../util'
 import { FormBloc } from '../form-bloc'
 import { SubmitForm } from './form-handler-event'
 import { FormHandlerState } from './form-handler-state'
@@ -70,10 +75,11 @@ export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
   protected getUnknownErrorResponse(error: unknown): ApiResponse<R> {
     return {
       status: false,
-      responseCode: '',
+      responseCode: getErrorResponseCode(error),
+      statusCode: getErrorStatusCode(error),
       message: getErrorMessage(error),
+      errors: getErrorErrors(error),
       data: null,
-      errors: null,
     }
   }
 }

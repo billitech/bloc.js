@@ -11,6 +11,14 @@ import {
 import { Rule, validate } from './validation'
 import { toTitleCase } from '../../../util'
 import { Optional } from '../../../optional'
+import { SubscriptionsContainer } from '../../../subscriptions-container'
+import {
+  combineLatest,
+  combineLatestWith,
+  distinct,
+  Observable,
+  OperatorFunction,
+} from 'rxjs'
 
 export abstract class InputBloc<T, E> extends Bloc<
   InputState<T, E>,
@@ -22,6 +30,8 @@ export abstract class InputBloc<T, E> extends Bloc<
   readonly validationRules: Rule<T, E>[]
   readonly isRequired: boolean
   readonly id: string
+  readonly subscriptionsContainer = new SubscriptionsContainer()
+  readonly errorFormatter?: (value: E) => E
 
   constructor(payload: {
     name: string
@@ -29,6 +39,7 @@ export abstract class InputBloc<T, E> extends Bloc<
     error?: E | null
     isRequired?: boolean
     rules?: Rule<T, E>[]
+    errorFormatter?: (value: E) => E
   }) {
     super(
       new InputState({
@@ -43,6 +54,7 @@ export abstract class InputBloc<T, E> extends Bloc<
     this.title = toTitleCase(payload.name)
     this.validationRules = payload.rules ?? []
     this.isRequired = payload.isRequired ?? false
+    this.errorFormatter = payload.errorFormatter
     this.id = `${payload.name}-${(Math.random() + 1).toString(36).substring(7)}`
   }
 
@@ -94,15 +106,20 @@ export abstract class InputBloc<T, E> extends Bloc<
     this.add(new InputChanged<T>(value))
   }
 
-  emitInputUnFocused(payload: ConstructorParameters<typeof InputUnFocused>[0]) {
+  emitInputUnFocused(payload?: { forceError?: boolean }) {
     this.add(new InputUnFocused(payload))
   }
 
-  emitResetInput(payload?: ConstructorParameters<typeof ResetInput>[0]) {
+  emitResetInput(payload?: {
+    resetValue?: boolean
+    resetError?: boolean
+    resetIsPure?: boolean
+    resetForceError?: boolean
+  }) {
     this.add(new ResetInput(payload))
   }
 
-  emitValidateInput(payload: ConstructorParameters<typeof ValidateInput>[0]) {
+  emitValidateInput(payload?: { forceDirty: boolean; forceError: boolean }) {
     this.add(new ValidateInput(payload))
   }
 
@@ -110,7 +127,7 @@ export abstract class InputBloc<T, E> extends Bloc<
     this.add(new InputValidationError<E>(error))
   }
 
-  validate(value: T) {
+  _doValidate(value: T) {
     if (this.isRequired) {
       const error = this.validateRequired(value)
       if (error) {
@@ -120,5 +137,48 @@ export abstract class InputBloc<T, E> extends Bloc<
     } else if (this.validateRequired(value) == undefined) {
       return validate<T, E>(value, this.title, this.validationRules)
     }
+  }
+
+  validate(value: T) {
+    const error = this._doValidate(value)
+    if (error != null && this.errorFormatter != null) {
+      return this.errorFormatter!(error)
+    }
+
+    return error
+  }
+
+  addRules(rules: Rule<T, E>[], forceValidation: boolean = false) {
+    this.validationRules.push(...rules)
+    if (forceValidation) {
+      this.emitValidateInput()
+    }
+  }
+
+  subscribeToInputBlocs(blocs: InputBloc<unknown, unknown>[]) {
+    if (blocs.length == 0) {
+      return
+    }
+
+    if (blocs.length == 1) {
+      this.subscriptionsContainer.add = blocs[0].subscribe(() => {
+        this.emitValidateInput()
+      })
+      return
+    }
+
+    let stream: Observable<unknown> = blocs[0].stream
+    for (const bloc of blocs.slice(1)) {
+      stream = stream.pipe(combineLatestWith(bloc.stream.pipe(distinct())))
+    }
+
+    this.subscriptionsContainer.add = stream.subscribe((_) => {
+      this.emitValidateInput()
+    })
+  }
+
+  dispose(): void {
+    this.subscriptionsContainer.dispose()
+    super.dispose()
   }
 }

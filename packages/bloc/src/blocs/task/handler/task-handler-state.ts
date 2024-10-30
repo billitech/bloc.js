@@ -1,4 +1,4 @@
-import { ApiResponse } from '../../../api'
+import type { ApiResponse } from '../../../api'
 import { Optional } from '../../../optional'
 
 export enum TaskHandlerStatus {

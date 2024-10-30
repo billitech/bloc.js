@@ -14,6 +14,7 @@ import { FormValidationException } from '../../exceptions/form-validation-except
 import { SubscriptionsContainer } from '../../subscriptions-container'
 import { debounceTime, distinct } from 'rxjs'
 import { Optional } from '../../optional'
+import { ApiResponse } from '../../api'
 
 export abstract class FormBloc extends Bloc<FormState, FormEvent> {
   abstract get fields(): InputBloc<any, any>[]
@@ -131,9 +132,10 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
     this.add(new FormLoadingChanged(loading))
   }
 
-  public emitFormSubmitted(
-    payload: ConstructorParameters<typeof FormSubmitted>[0],
-  ) {
+  public emitFormSubmitted(payload: {
+    response: ApiResponse<any>
+    resetForm?: boolean
+  }) {
     this.add(new FormSubmitted(payload))
   }
 

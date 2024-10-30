@@ -6,8 +6,9 @@ import {
   Observer,
   Subscription,
   from,
+  firstValueFrom,
 } from 'rxjs'
-import { concatMap, map } from 'rxjs/operators'
+import { concatMap, filter, map } from 'rxjs/operators'
 import { BlocObserver } from './bloc-observer'
 import { Transition } from './transition'
 import { deepEqual } from 'fast-equals'
@@ -144,6 +145,14 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
 
   onTransition(transition: Transition<State, Event>): void {
     Bloc.observer.onTransition(this, transition)
+  }
+
+  firstWhere(test: (state: State) => boolean): Promise<State> {
+    if (test(this.state)) {
+      return Promise.resolve(this.state)
+    }
+
+    return firstValueFrom(this.stream.pipe(filter(test)))
   }
 
   protected abstract mapEventToState(event: Event): AsyncGenerator<State>

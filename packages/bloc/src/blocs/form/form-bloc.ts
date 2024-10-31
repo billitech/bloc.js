@@ -21,7 +21,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
   readonly subscriptionsContainer = new SubscriptionsContainer()
   readonly id: string
 
-  constructor() {
+  constructor(readonly initDelayMs = 0.5) {
     super(
       new FormState({
         isValid: false,
@@ -34,7 +34,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
     )
       .toString(36)
       .substring(7)}`
-    setTimeout(() => this.initializeFields(), 0.5)
+    setTimeout(() => this.initializeFields(), initDelayMs)
   }
 
   initializeFields() {
@@ -70,12 +70,16 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
         isLoading: Optional.value(event.loading),
       })
     } else if (event instanceof FormSubmitted) {
+      this.onValidationError(event.response.errors ?? {})
       yield this.state.copyWith({
-        isValid: Optional.value(event.response.status),
-        isSubmitted: Optional.value(true),
+        isValid: Optional.value(
+          !event.response.errors ||
+            Object.keys(event.response.errors).length == 0,
+        ),
+        isSubmitted: Optional.value(event.response.status),
         isLoading: Optional.value(false),
       })
-      if (event.resetForm) {
+      if (event.response.status && event.resetForm) {
         this.resetForm()
       }
     } else if (event instanceof ValidateForm) {
@@ -83,7 +87,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
     } else if (event instanceof ResetForm) {
       this.resetForm()
     } else if (event instanceof FormValidationError) {
-      this.onValidationError(event.error)
+      this.onValidationError(event.error.errors)
       yield this.state.copyWith({
         isValid: Optional.value(false),
         isLoading: Optional.value(false),
@@ -103,15 +107,11 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
     })
   }
 
-  protected onValidationError(error: FormValidationException) {
-    for (const key in error.errors) {
+  protected onValidationError(errors: Record<string, string>) {
+    for (const key in errors) {
       const field = this.fields.find((field) => field.name === key)
-      if (
-        field &&
-        error.errors[key] !== null &&
-        error.errors[key] !== undefined
-      ) {
-        field.emitInputValidationError(error.errors[key])
+      if (field && errors[key] !== null && errors[key] !== undefined) {
+        field.emitInputValidationError(errors[key])
       }
     }
   }

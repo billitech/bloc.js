@@ -1,31 +1,57 @@
-import { createVNode, defineComponent, Fragment, SlotsType } from 'vue'
-import { Bloc, Transition } from '@billitech/bloc'
+import {
+  createVNode,
+  defineComponent,
+  Fragment,
+  SetupContext,
+  SlotsType,
+} from 'vue'
+import {
+  Bloc,
+  type BlocEvent,
+  type BlocState,
+  Transition,
+} from '@billitech/bloc'
 import { useBlocState } from '../compositions'
-import { PropType } from 'vue'
 
-export const BlocBuilder = defineComponent({
-  name: 'BlocBuilder',
-
-  props: {
-    bloc: {
-      type: Object as PropType<Bloc<any, any>>,
-      required: true,
+export const BlocBuilder = defineComponent(
+  <
+    B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>,
+    S = BlocState<B>,
+  >(
+    props: {
+      bloc: B
+      selector?: (state: BlocState<B>) => S
+      buildWhen?: (
+        transition: Transition<BlocState<B>, BlocEvent<B>>,
+      ) => boolean
     },
-    buildWhen: {
-      type: Function as PropType<(transition: Transition<any, any>) => boolean>,
-      default: () => true,
-    },
-  },
-  slots: { Object } as SlotsType<{
-    default: (state: Readonly<any>) => any
-  }>,
-  setup(props, { slots }) {
-    const state = useBlocState<any>(props.bloc, props.buildWhen)
-
+    {
+      slots,
+    }: SetupContext<
+      any,
+      SlotsType<{
+        default: (state: Readonly<any>) => any
+      }>
+    >,
+  ) => {
+    const state = useBlocState<B, S>(props.bloc, {
+      selector: props.selector,
+      condition: props.buildWhen,
+    })
     const defaultSlot = slots.default
       ? slots.default
-      : (state: Readonly<unknown>) => {}
+      : (state: Readonly<S>) => {}
 
     return () => createVNode(Fragment, null, [defaultSlot(state.value)])
   },
+  {
+    name: 'BlocBuilder',
+    slots: { Object } as SlotsType<{
+      default: (state: Readonly<any>) => any
+    }>,
+  },
+)
+
+Object.assign(BlocBuilder, {
+  props: ['bloc', 'buildWhen'],
 })

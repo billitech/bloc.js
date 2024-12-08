@@ -4,6 +4,7 @@ import {
   defineComponent,
   Fragment,
   PropType,
+  SetupContext,
   SlotsType,
   WatchOptions,
 } from 'vue'
@@ -29,7 +30,7 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
           .fill(0)
           .map(() => String.fromCharCode(Math.floor(Math.random() * 26) + 97))
           .join('') +
-        Date.now().toString(24)
+        Date.now().toString(24),
     )
   }
 
@@ -45,26 +46,27 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
     return useBloc<B>(this)
   }
 
-  useBlocState(
-    condition: (
-      transition: Transition<BlocState<B>, BlocEvent<B>>
-    ) => boolean = () => true
-  ) {
-    return useBlocState<B>(this, condition)
+  useBlocState<S = BlocState<B>>(options?: {
+    selector?: (state: BlocState<B>) => S
+    condition?: (transition: Transition<BlocState<B>, BlocEvent<B>>) => boolean
+  }) {
+    return useBlocState<B, S>(this, options)
   }
 
-  watchBlocState(
-    callback: (
-      newState: BlocState<B>,
-      oldState: BlocState<B> | undefined
-    ) => void,
-    option?: WatchOptions
+  watchBlocState<S = BlocState<B>>(
+    callback: (newState: S, oldState: S | undefined) => void,
+    options?: WatchOptions & {
+      selector?: (state: BlocState<B>) => S
+      condition?: (
+        transition: Transition<BlocState<B>, BlocEvent<B>>,
+      ) => boolean
+    },
   ) {
-    return watchBlocState<B>(this, callback, option)
+    return watchBlocState<B, S>(this, callback, options)
   }
 
   watchBlocTransition(
-    callback: (transition: Transition<BlocState<B>, BlocEvent<B>>) => void
+    callback: (transition: Transition<BlocState<B>, BlocEvent<B>>) => void,
   ) {
     return watchBlocTransition<B>(this, callback)
   }
@@ -94,30 +96,47 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
   }
 
   get Builder() {
-    return defineComponent({
-      name: 'BlocBuilder',
-
-      props: {
-        buildWhen: {
-          type: Function as PropType<
-            (transition: Transition<BlocState<B>, BlocEvent<B>>) => boolean
-          >,
-          default: () => true,
+    const builder = defineComponent(
+      <S = BlocState<B>>(
+        props: {
+          bloc: B
+          selector?: (state: BlocState<B>) => S
+          buildWhen?: (
+            transition: Transition<BlocState<B>, BlocEvent<B>>,
+          ) => boolean
         },
-      },
-      slots: { Object } as SlotsType<{
-        default: (state: Readonly<BlocState<B>>) => any
-      }>,
-      setup: (props, { slots }) => {
-        const state = this.useBlocState(props.buildWhen)
-
+        {
+          slots,
+        }: SetupContext<
+          any,
+          SlotsType<{
+            default: (state: Readonly<any>) => any
+          }>
+        >,
+      ) => {
+        const state = this.useBlocState<S>({
+          selector: props.selector,
+          condition: props.buildWhen,
+        })
         const defaultSlot = slots.default
           ? slots.default
-          : (state: Readonly<BlocState<B>>) => {}
+          : (state: Readonly<S>) => {}
 
         return () => createVNode(Fragment, null, [defaultSlot(state.value)])
       },
+      {
+        name: 'BlocBuilder',
+        slots: { Object } as SlotsType<{
+          default: (state: Readonly<any>) => any
+        }>,
+      },
+    )
+
+    Object.assign(builder, {
+      props: ['bloc', 'buildWhen'],
     })
+
+    return builder
   }
 
   get Use() {
@@ -136,7 +155,7 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
 }
 
 export const createBlocContext = <
-  B extends Bloc<BlocState<B>, BlocEvent<B>>
+  B extends Bloc<BlocState<B>, BlocEvent<B>>,
 >() => {
   return new BlocContext<B>()
 }

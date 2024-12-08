@@ -6,6 +6,7 @@ import {
   PropType,
   SetupContext,
   SlotsType,
+  VNodeChild,
   WatchOptions,
 } from 'vue'
 import {
@@ -99,11 +100,11 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
     const builder = defineComponent(
       <S = BlocState<B>>(
         props: {
-          bloc: B
           selector?: (state: BlocState<B>) => S
           buildWhen?: (
             transition: Transition<BlocState<B>, BlocEvent<B>>,
           ) => boolean
+          build?: (state: S) => VNodeChild
         },
         {
           slots,
@@ -133,7 +134,7 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
     )
 
     Object.assign(builder, {
-      props: ['bloc', 'buildWhen'],
+      props: ['build', 'selector', 'buildWhen'],
     })
 
     return builder

@@ -4,6 +4,7 @@ import {
   Fragment,
   SetupContext,
   SlotsType,
+  VNodeChild,
 } from 'vue'
 import {
   Bloc,
@@ -24,6 +25,7 @@ export const BlocBuilder = defineComponent(
       buildWhen?: (
         transition: Transition<BlocState<B>, BlocEvent<B>>,
       ) => boolean
+      build?: (state: S) => VNodeChild
     },
     {
       slots,
@@ -38,9 +40,11 @@ export const BlocBuilder = defineComponent(
       selector: props.selector,
       condition: props.buildWhen,
     })
-    const defaultSlot = slots.default
-      ? slots.default
-      : (state: Readonly<S>) => {}
+    const defaultSlot = props.build
+      ? props.build
+      : slots.default
+        ? slots.default
+        : (state: Readonly<S>) => {}
 
     return () => createVNode(Fragment, null, [defaultSlot(state.value)])
   },
@@ -53,5 +57,5 @@ export const BlocBuilder = defineComponent(
 )
 
 Object.assign(BlocBuilder, {
-  props: ['bloc', 'buildWhen'],
+  props: ['bloc', 'build', 'selector', 'buildWhen'],
 })

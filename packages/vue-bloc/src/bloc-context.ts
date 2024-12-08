@@ -119,9 +119,11 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
           selector: props.selector,
           condition: props.buildWhen,
         })
-        const defaultSlot = slots.default
-          ? slots.default
-          : (state: Readonly<S>) => {}
+        const defaultSlot = props.build
+          ? props.build
+          : slots.default
+            ? slots.default
+            : (state: Readonly<S>) => {}
 
         return () => createVNode(Fragment, null, [defaultSlot(state.value)])
       },

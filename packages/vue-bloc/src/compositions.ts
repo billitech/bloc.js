@@ -15,6 +15,8 @@ import {
   BlocState,
   Transition,
   SubscriptionsContainer,
+  ObjectInputBloc,
+  Rule,
 } from '@billitech/bloc'
 import { BlocContext } from './bloc-context'
 
@@ -158,4 +160,28 @@ export const useSubscriptionsContainer = (): SubscriptionsContainer => {
   })
 
   return container
+}
+
+export const useRefInputBloc = <T>(
+  ref: Ref<T>,
+  payload: {
+    name: string
+    isRequired?: boolean
+    rules?: Rule<T | null, string>[] | undefined
+  },
+): ObjectInputBloc<T> => {
+  const bloc = new ObjectInputBloc<T>({
+    ...payload,
+    value: ref.value,
+  })
+
+  watch(ref, () => {
+    bloc.emitInputChanged(ref.value)
+  })
+
+  watchBlocState(bloc, () => {
+    ref.value = bloc.state.value
+  })
+
+  return bloc
 }

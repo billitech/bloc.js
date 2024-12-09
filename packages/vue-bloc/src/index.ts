@@ -7,4 +7,5 @@ export {
   watchBlocTransition,
   watchBlocState,
   useSubscriptionsContainer,
+  useRefInputBloc,
 } from './compositions'

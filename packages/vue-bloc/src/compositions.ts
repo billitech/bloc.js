@@ -17,6 +17,7 @@ import {
   SubscriptionsContainer,
   ObjectInputBloc,
   Rule,
+  InputBloc,
 } from '@billitech/bloc'
 import { BlocContext } from './bloc-context'
 
@@ -162,26 +163,63 @@ export const useSubscriptionsContainer = (): SubscriptionsContainer => {
   return container
 }
 
-export const useRefInputBloc = <T>(
+export const useRefInputBloc = <T, S = T>(
   ref: Ref<T>,
-  payload: {
+  options: {
     name: string
     isRequired?: boolean
-    rules?: Rule<T | null, string>[] | undefined
+    rules?: Rule<S | null, string>[] | undefined
+    transform?: {
+      getter: (value: T) => S
+      setter: (value: S) => T
+    }
   },
-): ObjectInputBloc<T> => {
-  const bloc = new ObjectInputBloc<T>({
-    ...payload,
-    value: ref.value,
+): ObjectInputBloc<S> => {
+  const bloc = new ObjectInputBloc<S>({
+    ...options,
+    value: options.transform?.getter
+      ? options.transform.getter(ref.value)
+      : (ref.value as any as S),
   })
 
   watch(ref, () => {
-    bloc.emitInputChanged(ref.value)
+    bloc.emitInputChanged(
+      options.transform?.getter
+        ? options.transform.getter(ref.value)
+        : (ref.value as any as S),
+    )
   })
 
   watchBlocState(bloc, () => {
-    ref.value = bloc.state.value
+    ref.value = options.transform?.setter
+      ? options.transform.setter(bloc.state.value)
+      : (bloc.state.value as any as T)
   })
 
   return bloc
+}
+
+export const useSyncRefInputBloc = <T, S = T>(
+  ref: Ref<T>,
+  bloc: InputBloc<S, any>,
+  options: {
+    transform?: {
+      getter: (value: T) => S
+      setter: (value: S) => T
+    }
+  },
+): void => {
+  watch(ref, () => {
+    bloc.emitInputChanged(
+      options.transform?.getter
+        ? options.transform.getter(ref.value)
+        : (ref.value as any as S),
+    )
+  })
+
+  watchBlocState(bloc, () => {
+    ref.value = options.transform?.setter
+      ? options.transform.setter(bloc.state.value)
+      : (bloc.state.value as any as T)
+  })
 }

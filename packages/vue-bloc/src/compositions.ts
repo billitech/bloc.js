@@ -202,7 +202,7 @@ export const useRefInputBloc = <T, S = T>(
 export const useSyncRefInputBloc = <T, S = T>(
   ref: Ref<T>,
   bloc: InputBloc<S, any>,
-  options: {
+  options?: {
     transform?: {
       getter: (value: T) => S
       setter: (value: S) => T
@@ -211,14 +211,14 @@ export const useSyncRefInputBloc = <T, S = T>(
 ): void => {
   watch(ref, () => {
     bloc.emitInputChanged(
-      options.transform?.getter
+      options?.transform?.getter
         ? options.transform.getter(ref.value)
         : (ref.value as any as S),
     )
   })
 
   watchBlocState(bloc, () => {
-    ref.value = options.transform?.setter
+    ref.value = options?.transform?.setter
       ? options.transform.setter(bloc.state.value)
       : (bloc.state.value as any as T)
   })

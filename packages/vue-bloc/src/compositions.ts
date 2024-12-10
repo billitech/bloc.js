@@ -208,13 +208,17 @@ export const useSyncRefInputBloc = <T, S = T>(
     }
   },
 ): void => {
-  watch(ref, () => {
-    bloc.emitInputChanged(
-      options?.transform?.getter
-        ? options.transform.getter(ref.value)
-        : (ref.value as any as S),
-    )
-  })
+  watch(
+    ref,
+    () => {
+      bloc.emitInputChanged(
+        options?.transform?.getter
+          ? options.transform.getter(ref.value)
+          : (ref.value as any as S),
+      )
+    },
+    { immediate: true },
+  )
 
   watchBlocState(bloc, () => {
     ref.value = options?.transform?.setter
@@ -233,13 +237,17 @@ export const useSyncInputBlocs = <T, S = T>(
     }
   },
 ): void => {
-  watchBlocState(bloc1, () => {
-    bloc2.emitInputChanged(
-      options?.transform?.getter
-        ? options.transform.getter(bloc1.state.value)
-        : (bloc1.state.value as any as S),
-    )
-  })
+  watchBlocState(
+    bloc1,
+    () => {
+      bloc2.emitInputChanged(
+        options?.transform?.getter
+          ? options.transform.getter(bloc1.state.value)
+          : (bloc1.state.value as any as S),
+      )
+    },
+    { immediate: true },
+  )
 
   watchBlocState(bloc2, () => {
     bloc1.emitInputChanged(

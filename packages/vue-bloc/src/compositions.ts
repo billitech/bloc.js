@@ -7,7 +7,6 @@ import {
   shallowRef,
   shallowReadonly,
   onBeforeUnmount,
-  ShallowRef,
 } from 'vue'
 import {
   Bloc,
@@ -221,5 +220,32 @@ export const useSyncRefInputBloc = <T, S = T>(
     ref.value = options?.transform?.setter
       ? options.transform.setter(bloc.state.value)
       : (bloc.state.value as any as T)
+  })
+}
+
+export const useSyncInputBlocs = <T, S = T>(
+  bloc1: InputBloc<T, any>,
+  bloc2: InputBloc<S, any>,
+  options?: {
+    transform?: {
+      getter: (value: T) => S
+      setter: (value: S) => T
+    }
+  },
+): void => {
+  watchBlocState(bloc1, () => {
+    bloc2.emitInputChanged(
+      options?.transform?.getter
+        ? options.transform.getter(bloc1.state.value)
+        : (bloc1.state.value as any as S),
+    )
+  })
+
+  watchBlocState(bloc2, () => {
+    bloc1.emitInputChanged(
+      options?.transform?.setter
+        ? options.transform.setter(bloc2.state.value)
+        : (bloc2.state.value as any as T),
+    )
   })
 }

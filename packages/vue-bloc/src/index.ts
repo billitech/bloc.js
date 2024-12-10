@@ -9,4 +9,5 @@ export {
   useSubscriptionsContainer,
   useRefInputBloc,
   useSyncRefInputBloc,
+  useSyncInputBlocs,
 } from './compositions'

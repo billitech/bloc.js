@@ -4,6 +4,7 @@ export {
   provideBloc,
   useBloc,
   useBlocState,
+  useBlocStates,
   watchBlocTransition,
   watchBlocState,
   useSubscriptionsContainer,

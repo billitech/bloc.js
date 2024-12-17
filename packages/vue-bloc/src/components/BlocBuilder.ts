@@ -12,7 +12,7 @@ import {
   type BlocState,
   Transition,
 } from '@billitech/bloc'
-import { useBlocState } from '../compositions'
+import { useBlocState, useBlocStates } from '../compositions'
 
 export const BlocBuilder = defineComponent(
   <
@@ -25,18 +25,18 @@ export const BlocBuilder = defineComponent(
       buildWhen?: (
         transition: Transition<BlocState<B>, BlocEvent<B>>,
       ) => boolean
-      build?: (state: S) => VNodeChild
+      build?: (state: S, oldState: S | undefined) => VNodeChild
     },
     {
       slots,
     }: SetupContext<
       any,
       SlotsType<{
-        default: (state: Readonly<any>) => any
+        default: (state: Readonly<S>, oldState: Readonly<S> | undefined) => any
       }>
     >,
   ) => {
-    const state = useBlocState<B, S>(props.bloc, {
+    const state = useBlocStates<B, S>(props.bloc, {
       selector: props.selector,
       condition: props.buildWhen,
     })
@@ -44,14 +44,18 @@ export const BlocBuilder = defineComponent(
       ? props.build
       : slots.default
         ? slots.default
-        : (state: Readonly<S>) => {}
+        : (state: Readonly<S>, oldState: Readonly<S> | undefined) => {}
 
-    return () => createVNode(Fragment, null, [defaultSlot(state.value)])
+    return () =>
+      createVNode(Fragment, null, [defaultSlot(state.value[0], state.value[1])])
   },
   {
     name: 'BlocBuilder',
     slots: { Object } as SlotsType<{
-      default: (state: Readonly<any>) => any
+      default: (
+        state: Readonly<any>,
+        oldState: Readonly<any> | undefined,
+      ) => any
     }>,
   },
 )

@@ -120,6 +120,48 @@ export const useBlocState = <
   return shallowReadonly(state)
 }
 
+export const useBlocStates = <
+  B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>,
+  S = BlocState<B>,
+>(
+  bloc: B | Symbol | BlocContext<B>,
+  options?: {
+    selector?: (state: BlocState<B>) => S
+    condition?: (transition: Transition<BlocState<B>, BlocEvent<B>>) => boolean
+  },
+): Readonly<Ref<[S, S | undefined]>> => {
+  type State = BlocState<B>
+  type Event = BlocEvent<B>
+
+  if (!(bloc instanceof Bloc)) {
+    bloc = useBloc(bloc)
+  }
+
+  const state = shallowRef<[S, S | undefined]>([
+    options?.selector ? options.selector(bloc.state) : (bloc.state as S),
+    undefined,
+  ])
+
+  const subscription = bloc.transitionStream.subscribe(
+    (transition: Transition<State, Event>) => {
+      if (!options?.condition || options.condition(transition)) {
+        state.value = [
+          options?.selector
+            ? options.selector(transition.nextState)
+            : (transition.nextState as S),
+          state.value[0],
+        ]
+      }
+    },
+  )
+
+  onBeforeUnmount(() => {
+    subscription.unsubscribe()
+  })
+
+  return shallowReadonly(state)
+}
+
 export const watchBlocState = <
   B extends Bloc<BlocState<B>, BlocEvent<B>> = Bloc<any, any>,
   S = BlocState<B>,

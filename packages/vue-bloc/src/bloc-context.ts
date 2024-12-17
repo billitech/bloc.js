@@ -13,6 +13,7 @@ import {
   provideBloc,
   useBloc,
   useBlocState,
+  useBlocStates,
   watchBlocState,
   watchBlocTransition,
 } from './compositions'
@@ -52,6 +53,13 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
     condition?: (transition: Transition<BlocState<B>, BlocEvent<B>>) => boolean
   }) {
     return useBlocState<B, S>(this, options)
+  }
+
+  useBlocStates<S = BlocState<B>>(options?: {
+    selector?: (state: BlocState<B>) => S
+    condition?: (transition: Transition<BlocState<B>, BlocEvent<B>>) => boolean
+  }) {
+    return useBlocStates<B, S>(this, options)
   }
 
   watchBlocState<S = BlocState<B>>(
@@ -104,18 +112,21 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
           buildWhen?: (
             transition: Transition<BlocState<B>, BlocEvent<B>>,
           ) => boolean
-          build?: (state: S) => VNodeChild
+          build?: (state: S, oldState: S | undefined) => VNodeChild
         },
         {
           slots,
         }: SetupContext<
           any,
           SlotsType<{
-            default: (state: Readonly<any>) => any
+            default: (
+              state: Readonly<any>,
+              oldState: Readonly<any> | undefined,
+            ) => any
           }>
         >,
       ) => {
-        const state = this.useBlocState<S>({
+        const state = this.useBlocStates<S>({
           selector: props.selector,
           condition: props.buildWhen,
         })
@@ -123,14 +134,20 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
           ? props.build
           : slots.default
             ? slots.default
-            : (state: Readonly<S>) => {}
+            : (state: Readonly<S>, oldState: Readonly<S> | undefined) => {}
 
-        return () => createVNode(Fragment, null, [defaultSlot(state.value)])
+        return () =>
+          createVNode(Fragment, null, [
+            defaultSlot(state.value[0], state.value[1]),
+          ])
       },
       {
         name: 'BlocBuilder',
         slots: { Object } as SlotsType<{
-          default: (state: Readonly<any>) => any
+          default: (
+            state: Readonly<any>,
+            oldState: Readonly<any> | undefined,
+          ) => any
         }>,
       },
     )

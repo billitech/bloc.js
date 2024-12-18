@@ -145,12 +145,12 @@ export const useBlocStates = <
   const subscription = bloc.transitionStream.subscribe(
     (transition: Transition<State, Event>) => {
       if (!options?.condition || options.condition(transition)) {
-        state.value = [
-          options?.selector
-            ? options.selector(transition.nextState)
-            : (transition.nextState as S),
-          state.value[0],
-        ]
+        const selectedValue = options?.selector
+          ? options.selector(transition.nextState)
+          : (transition.nextState as S)
+        if (selectedValue != state.value[0]) {
+          state.value = [selectedValue, state.value[0]]
+        }
       }
     },
   )

@@ -135,15 +135,12 @@ export const useBlocStates = <
     bloc = useBloc(bloc)
   }
 
-  const state = shallowRef<[BlocState<B>, BlocState<B> | undefined]>([
-    bloc.state,
-    undefined,
-  ])
+  const state = shallowRef(bloc.state)
 
   const subscription = bloc.transitionStream.subscribe(
     (transition: Transition<State, Event>) => {
       if (!options?.condition || options.condition(transition)) {
-        state.value = [transition.nextState, state.value[0]]
+        state.value = transition.nextState
       }
     },
   )
@@ -154,19 +151,14 @@ export const useBlocStates = <
 
   return computed((oldValue) => {
     const newValue1 = options?.selector
-      ? options.selector(state.value[0])
-      : state.value[0]
+      ? options.selector(state.value)
+      : state.value
 
-    const newValue2 =
-      state.value[1] && options?.selector
-        ? options.selector(state.value[1])
-        : state.value[1]
-
-    if (oldValue && oldValue[0] == newValue1 && oldValue[1] == newValue2) {
+    if (oldValue && oldValue[0] == newValue1) {
       return oldValue
     }
 
-    return [newValue1 as S, newValue2 as S | undefined]
+    return [newValue1 as S, oldValue ? oldValue[0] : undefined]
   })
 }
 

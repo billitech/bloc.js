@@ -25,7 +25,10 @@ export const BlocBuilder = defineComponent(
       buildWhen?: (
         transition: Transition<BlocState<B>, BlocEvent<B>>,
       ) => boolean
-      build?: (state: S, oldState: S | undefined) => VNodeChild
+      build?: (
+        state: BlocState<B> | S,
+        oldState: BlocState<B> | S | undefined,
+      ) => VNodeChild
     },
     {
       slots,
@@ -47,7 +50,9 @@ export const BlocBuilder = defineComponent(
         : (state: Readonly<S>, oldState: Readonly<S> | undefined) => {}
 
     return () =>
-      createVNode(Fragment, null, [defaultSlot(state.value[0], state.value[1])])
+      createVNode(Fragment, null, [
+        defaultSlot(state.value[0] as any, state.value[1] as any),
+      ])
   },
   {
     name: 'BlocBuilder',

@@ -5,7 +5,7 @@
     "module":"esnext",
     "lib": ["esnext", "dom"],
     "strict": true,
-    "sourceMap": true,
+    "sourceMap": false,
     "declaration": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,

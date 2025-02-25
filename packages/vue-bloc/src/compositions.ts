@@ -5,8 +5,8 @@ import {
   watch,
   WatchOptions,
   shallowRef,
-  shallowReadonly,
   onBeforeUnmount,
+  computed,
 } from 'vue'
 import {
   Bloc,
@@ -91,7 +91,7 @@ export const useBlocState = <
     selector?: (state: BlocState<B>) => S
     condition?: (transition: Transition<BlocState<B>, BlocEvent<B>>) => boolean
   },
-): Readonly<Ref<S>> => {
+): Readonly<Ref<BlocState<B> | S>> => {
   type State = BlocState<B>
   type Event = BlocEvent<B>
 
@@ -99,16 +99,12 @@ export const useBlocState = <
     bloc = useBloc(bloc)
   }
 
-  const state = shallowRef<S>(
-    options?.selector ? options.selector(bloc.state) : (bloc.state as S),
-  )
+  const state = shallowRef(bloc.state)
 
   const subscription = bloc.transitionStream.subscribe(
     (transition: Transition<State, Event>) => {
       if (!options?.condition || options.condition(transition)) {
-        state.value = options?.selector
-          ? options.selector(transition.nextState)
-          : (transition.nextState as S)
+        state.value = transition.nextState
       }
     },
   )
@@ -117,7 +113,9 @@ export const useBlocState = <
     subscription.unsubscribe()
   })
 
-  return shallowReadonly(state)
+  return computed(() =>
+    options?.selector ? options.selector(state.value) : state.value,
+  )
 }
 
 export const useBlocStates = <
@@ -129,7 +127,7 @@ export const useBlocStates = <
     selector?: (state: BlocState<B>) => S
     condition?: (transition: Transition<BlocState<B>, BlocEvent<B>>) => boolean
   },
-): Readonly<Ref<[S, S | undefined]>> => {
+): Readonly<Ref<[BlocState<B> | S, BlocState<B> | S | undefined]>> => {
   type State = BlocState<B>
   type Event = BlocEvent<B>
 
@@ -137,20 +135,15 @@ export const useBlocStates = <
     bloc = useBloc(bloc)
   }
 
-  const state = shallowRef<[S, S | undefined]>([
-    options?.selector ? options.selector(bloc.state) : (bloc.state as S),
+  const state = shallowRef<[BlocState<B>, BlocState<B> | undefined]>([
+    bloc.state,
     undefined,
   ])
 
   const subscription = bloc.transitionStream.subscribe(
     (transition: Transition<State, Event>) => {
       if (!options?.condition || options.condition(transition)) {
-        const selectedValue = options?.selector
-          ? options.selector(transition.nextState)
-          : (transition.nextState as S)
-        if (selectedValue != state.value[0]) {
-          state.value = [selectedValue, state.value[0]]
-        }
+        state.value = [transition.nextState, state.value[0]]
       }
     },
   )
@@ -159,7 +152,22 @@ export const useBlocStates = <
     subscription.unsubscribe()
   })
 
-  return shallowReadonly(state)
+  return computed((oldValue) => {
+    const newValue1 = options?.selector
+      ? options.selector(state.value[0])
+      : state.value[0]
+
+    const newValue2 =
+      state.value[1] && options?.selector
+        ? options.selector(state.value[1])
+        : state.value[1]
+
+    if (oldValue && oldValue[0] == newValue1 && oldValue[1] == newValue2) {
+      return oldValue
+    }
+
+    return [newValue1, newValue2]
+  })
 }
 
 export const watchBlocState = <
@@ -167,7 +175,10 @@ export const watchBlocState = <
   S = BlocState<B>,
 >(
   bloc: B | Symbol | BlocContext<B>,
-  callback: (newState: S, oldState: S | undefined) => void,
+  callback: (
+    newState: BlocState<B> | S,
+    oldState: BlocState<B> | S | undefined,
+  ) => void,
   options?: WatchOptions & {
     selector?: (state: BlocState<B>) => S
     condition?: (transition: Transition<BlocState<B>, BlocEvent<B>>) => boolean

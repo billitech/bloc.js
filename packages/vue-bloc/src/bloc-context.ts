@@ -63,7 +63,10 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
   }
 
   watchBlocState<S = BlocState<B>>(
-    callback: (newState: S, oldState: S | undefined) => void,
+    callback: (
+      newState: BlocState<B> | S,
+      oldState: BlocState<B> | S | undefined,
+    ) => void,
     options?: WatchOptions & {
       selector?: (state: BlocState<B>) => S
       condition?: (
@@ -112,7 +115,10 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
           buildWhen?: (
             transition: Transition<BlocState<B>, BlocEvent<B>>,
           ) => boolean
-          build?: (state: S, oldState: S | undefined) => VNodeChild
+          build?: (
+            state: BlocState<B> | S,
+            oldState: BlocState<B> | S | undefined,
+          ) => VNodeChild
         },
         {
           slots,
@@ -134,11 +140,11 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
           ? props.build
           : slots.default
             ? slots.default
-            : (state: Readonly<S>, oldState: Readonly<S> | undefined) => {}
+            : () => {}
 
         return () =>
           createVNode(Fragment, null, [
-            defaultSlot(state.value[0], state.value[1]),
+            defaultSlot(state.value[0] as any, state.value[1] as any),
           ])
       },
       {

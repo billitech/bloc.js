@@ -3,8 +3,8 @@ import { nodeResolve } from '@rollup/plugin-node-resolve'
 import typescript from '@rollup/plugin-typescript'
 import json from '@rollup/plugin-json'
 import commonjs from '@rollup/plugin-commonjs'
-
-import pkg from './package.json' assert { type: 'json' }
+import fs from 'fs'
+const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'))
 
 const libraryNameCamel = 'Vue-bloc'
 
@@ -33,5 +33,11 @@ export default {
   watch: {
     include: 'src/**',
   },
-  plugins: [json(), typescript(), commonjs(), nodeResolve(), sourceMaps()],
+  plugins: [
+    json(),
+    typescript({ tsconfig: './tsconfig.json', sourceMap: true }),
+    commonjs(),
+    nodeResolve(),
+    sourceMaps(),
+  ],
 }

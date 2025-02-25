@@ -25,10 +25,7 @@ export const BlocBuilder = defineComponent(
       buildWhen?: (
         transition: Transition<BlocState<B>, BlocEvent<B>>,
       ) => boolean
-      build?: (
-        state: BlocState<B> | S,
-        oldState: BlocState<B> | S | undefined,
-      ) => VNodeChild
+      build?: (state: S, oldState: S | undefined) => VNodeChild
     },
     {
       slots,

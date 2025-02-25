@@ -84,12 +84,11 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
   }
 
   get Provider() {
-    type BlocCallbackProp = PropType<() => B | B>
     return defineComponent({
       name: 'BlocProvider',
       props: {
         bloc: {
-          type: Function as BlocCallbackProp,
+          type: Function as PropType<() => B | B>,
           required: true,
         },
         disposable: {
@@ -115,10 +114,7 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
           buildWhen?: (
             transition: Transition<BlocState<B>, BlocEvent<B>>,
           ) => boolean
-          build?: (
-            state: BlocState<B> | S,
-            oldState: BlocState<B> | S | undefined,
-          ) => VNodeChild
+          build?: (state: S, oldState: S | undefined) => VNodeChild
         },
         {
           slots,
@@ -126,8 +122,8 @@ export class BlocContext<B extends Bloc<BlocState<B>, BlocEvent<B>>> {
           any,
           SlotsType<{
             default: (
-              state: Readonly<any>,
-              oldState: Readonly<any> | undefined,
+              state: Readonly<S>,
+              oldState: Readonly<S> | undefined,
             ) => any
           }>
         >,

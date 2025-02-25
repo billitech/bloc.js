@@ -91,7 +91,7 @@ export const useBlocState = <
     selector?: (state: BlocState<B>) => S
     condition?: (transition: Transition<BlocState<B>, BlocEvent<B>>) => boolean
   },
-): Readonly<Ref<BlocState<B> | S>> => {
+): Readonly<Ref<S>> => {
   type State = BlocState<B>
   type Event = BlocEvent<B>
 
@@ -127,7 +127,7 @@ export const useBlocStates = <
     selector?: (state: BlocState<B>) => S
     condition?: (transition: Transition<BlocState<B>, BlocEvent<B>>) => boolean
   },
-): Readonly<Ref<[BlocState<B> | S, BlocState<B> | S | undefined]>> => {
+): Readonly<Ref<[S, S | undefined]>> => {
   type State = BlocState<B>
   type Event = BlocEvent<B>
 
@@ -166,7 +166,7 @@ export const useBlocStates = <
       return oldValue
     }
 
-    return [newValue1, newValue2]
+    return [newValue1 as S, newValue2 as S | undefined]
   })
 }
 
@@ -175,10 +175,7 @@ export const watchBlocState = <
   S = BlocState<B>,
 >(
   bloc: B | Symbol | BlocContext<B>,
-  callback: (
-    newState: BlocState<B> | S,
-    oldState: BlocState<B> | S | undefined,
-  ) => void,
+  callback: (newState: S, oldState: S | undefined) => void,
   options?: WatchOptions & {
     selector?: (state: BlocState<B>) => S
     condition?: (transition: Transition<BlocState<B>, BlocEvent<B>>) => boolean
@@ -227,26 +224,43 @@ export const useRefInputBloc = <T, S = T>(
     }
   },
 ): ObjectInputBloc<S> => {
-  const bloc = new ObjectInputBloc<S>({
-    ...options,
-    value: options.transform?.getter
+  const getValue = computed(() =>
+    options.transform?.getter
       ? options.transform.getter(ref.value)
       : (ref.value as any as S),
+  )
+  const bloc = new ObjectInputBloc<S>({
+    ...options,
+    value: getValue.value,
   })
 
-  watch(ref, () => {
-    bloc.emitInputChanged(
-      options.transform?.getter
-        ? options.transform.getter(ref.value)
-        : (ref.value as any as S),
-    )
+  const blocState = useBlocState(bloc)
+
+  const setValue = computed(() => {
+    return options.transform?.setter
+      ? options.transform.setter(blocState.value.value)
+      : (blocState.value.value as any as T)
   })
 
-  watchBlocState(bloc, () => {
-    ref.value = options.transform?.setter
-      ? options.transform.setter(bloc.state.value)
-      : (bloc.state.value as any as T)
-  })
+  watch(
+    getValue,
+    (getValue) => {
+      bloc.emitInputChanged(getValue)
+    },
+    {
+      flush: 'sync',
+    },
+  )
+
+  watch(
+    setValue,
+    (setValue) => {
+      ref.value = setValue
+    },
+    {
+      flush: 'sync',
+    },
+  )
 
   return bloc
 }
@@ -261,23 +275,38 @@ export const useSyncRefInputBloc = <T, S = T>(
     }
   },
 ): void => {
+  const blocState = useBlocState(bloc)
+  const getValue = computed(() =>
+    options?.transform?.getter
+      ? options.transform.getter(ref.value)
+      : (ref.value as any as S),
+  )
+  const setValue = computed(() => {
+    return options?.transform?.setter
+      ? options.transform.setter(blocState.value.value)
+      : (blocState.value.value as any as T)
+  })
+
   watch(
-    ref,
-    () => {
-      bloc.emitInputChanged(
-        options?.transform?.getter
-          ? options.transform.getter(ref.value)
-          : (ref.value as any as S),
-      )
+    getValue,
+    (getValue) => {
+      bloc.emitInputChanged(getValue)
     },
-    { immediate: true },
+    {
+      flush: 'sync',
+      immediate: true,
+    },
   )
 
-  watchBlocState(bloc, () => {
-    ref.value = options?.transform?.setter
-      ? options.transform.setter(bloc.state.value)
-      : (bloc.state.value as any as T)
-  })
+  watch(
+    setValue,
+    (setValue) => {
+      ref.value = setValue
+    },
+    {
+      flush: 'sync',
+    },
+  )
 }
 
 export const useSyncInputBlocs = <T, S = T>(
@@ -290,23 +319,38 @@ export const useSyncInputBlocs = <T, S = T>(
     }
   },
 ): void => {
-  watchBlocState(
-    bloc1,
-    () => {
-      bloc2.emitInputChanged(
-        options?.transform?.getter
-          ? options.transform.getter(bloc1.state.value)
-          : (bloc1.state.value as any as S),
-      )
+  const bloc1State = useBlocState(bloc1)
+  const bloc2State = useBlocState(bloc2)
+
+  const getValue = computed(() =>
+    options?.transform?.getter
+      ? options.transform.getter(bloc1State.value.value)
+      : (bloc1State.value.value as any as S),
+  )
+  const setValue = computed(() => {
+    return options?.transform?.setter
+      ? options.transform.setter(bloc2State.value.value)
+      : (bloc2State.value.value as any as T)
+  })
+
+  watch(
+    getValue,
+    (getValue) => {
+      bloc2.emitInputChanged(getValue)
     },
-    { immediate: true },
+    {
+      flush: 'sync',
+      immediate: true,
+    },
   )
 
-  watchBlocState(bloc2, () => {
-    bloc1.emitInputChanged(
-      options?.transform?.setter
-        ? options.transform.setter(bloc2.state.value)
-        : (bloc2.state.value as any as T),
-    )
-  })
+  watch(
+    setValue,
+    (setValue) => {
+      bloc1.emitInputChanged(setValue)
+    },
+    {
+      flush: 'sync',
+    },
+  )
 }

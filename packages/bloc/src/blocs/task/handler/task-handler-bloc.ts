@@ -1,7 +1,7 @@
 import { DoTask } from './task-handler-event'
 import { TaskHandlerState } from './task-handler-state'
 import { Bloc } from '../../../bloc'
-import { TaskBloc, TaskResponseType } from '../task-bloc'
+import { TaskBloc, TaskBlocResponseType } from '../task-bloc'
 import {
   getErrorErrors,
   getErrorMessage,
@@ -14,7 +14,7 @@ import { FormValidationException } from '../../../exceptions'
 
 export abstract class TaskHandlerBloc<
   T extends TaskBloc<R>,
-  R = TaskResponseType<T>,
+  R = TaskBlocResponseType<T>,
 > extends Bloc<TaskHandlerState<T, R>, DoTask<T, R>> {
   constructor() {
     super(new TaskHandlerState())
@@ -31,7 +31,9 @@ export abstract class TaskHandlerBloc<
       yield this.state.copyWith({
         isLoading: Optional.value(false),
         task: Optional.value(event.task),
-        response: Optional.value(resp),
+        response: Optional.value(
+          Object.assign(resp, { __taskId: event.task.id }),
+        ),
       })
       if (!event.task.closed) {
         event.task.emitSuccess(resp)
@@ -42,7 +44,9 @@ export abstract class TaskHandlerBloc<
         yield this.state.copyWith({
           isLoading: Optional.value(false),
           task: Optional.value(event.task),
-          response: Optional.value(resp),
+          response: Optional.value(
+            Object.assign(resp, { __taskId: event.task.id }),
+          ),
         })
         if (!event.task.closed) {
           event.task.emitFailure(resp)
@@ -52,7 +56,9 @@ export abstract class TaskHandlerBloc<
         yield this.state.copyWith({
           isLoading: Optional.value(false),
           task: Optional.value(event.task),
-          response: Optional.value(resp),
+          response: Optional.value(
+            Object.assign(resp, { __taskId: event.task.id }),
+          ),
         })
         if (!event.task.closed) {
           if (!event.task.closed) {

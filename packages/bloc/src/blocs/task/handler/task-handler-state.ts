@@ -10,14 +10,18 @@ export enum TaskHandlerStatus {
 
 export class TaskHandlerState<T, R> {
   readonly isLoading: boolean
-  readonly response?: ApiResponse<R>
+  readonly response?: ApiResponse<R> & { __taskId: string | number }
   readonly task?: T
 
   constructor({
     isLoading = false,
     response,
     task,
-  }: { isLoading?: boolean; response?: ApiResponse<R>; task?: T } = {}) {
+  }: {
+    isLoading?: boolean
+    response?: ApiResponse<R> & { __taskId: string | number }
+    task?: T
+  } = {}) {
     this.isLoading = isLoading
     this.response = response
     this.task = task
@@ -29,7 +33,9 @@ export class TaskHandlerState<T, R> {
     task,
   }: {
     isLoading?: Optional<boolean>
-    response?: Optional<ApiResponse<R> | undefined>
+    response?: Optional<
+      (ApiResponse<R> & { __taskId: string | number }) | undefined
+    >
     task?: Optional<T | undefined>
   }): TaskHandlerState<T, R> {
     return new TaskHandlerState<T, R>({

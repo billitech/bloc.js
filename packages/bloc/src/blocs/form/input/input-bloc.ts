@@ -12,13 +12,7 @@ import { Rule, validate } from './validation'
 import { toTitleCase } from '../../../util'
 import { Optional } from '../../../optional'
 import { SubscriptionsContainer } from '../../../subscriptions-container'
-import {
-  combineLatest,
-  combineLatestWith,
-  distinct,
-  Observable,
-  OperatorFunction,
-} from 'rxjs'
+import { combineLatestWith, distinct, Observable } from 'rxjs'
 
 export abstract class InputBloc<T, E> extends Bloc<
   InputState<T, E>,
@@ -58,7 +52,7 @@ export abstract class InputBloc<T, E> extends Bloc<
     this.id = `${payload.name}-${(Math.random() + 1).toString(36).substring(7)}`
   }
 
-  protected async *mapEventToState(event: InputEvent<T, E>) {
+  protected *mapEventToState(event: InputEvent<T, E>) {
     if (event instanceof InputChanged) {
       yield this.state.copyWith({
         value: Optional.value(event.value),

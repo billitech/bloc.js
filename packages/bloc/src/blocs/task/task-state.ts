@@ -1,4 +1,5 @@
 import { ApiResponse } from '../../api'
+import { Equatable } from '../../equatable'
 import { Optional } from '../../optional'
 
 export enum TaskStatus {
@@ -8,7 +9,7 @@ export enum TaskStatus {
   Success = 'success',
 }
 
-export class TaskState<R> {
+export class TaskState<R = any> extends Equatable {
   readonly isLoading: boolean
   readonly response?: ApiResponse<R>
 
@@ -16,6 +17,7 @@ export class TaskState<R> {
     isLoading = false,
     response,
   }: { isLoading?: boolean; response?: ApiResponse<R> } = {}) {
+    super()
     this.isLoading = isLoading
     this.response = response
   }

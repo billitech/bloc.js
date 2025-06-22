@@ -1,8 +1,8 @@
-export { Bloc, BlocState, BlocEvent } from './bloc'
+export { Bloc, BlocState, BlocEvent, MapEventToStateReturn } from './bloc'
 export { Transition } from './transition'
 export { BlocObserver } from './bloc-observer'
 
-export { FormBloc } from './blocs/form/form-bloc'
+export { FormBloc, FormBlocResponseType } from './blocs/form/form-bloc'
 export { FormState } from './blocs/form/form-state'
 
 export { Cubit, CubitEvent } from './cubit'
@@ -44,6 +44,7 @@ export {
   EmailInputBloc,
   NumberInputBloc,
   FileInputBloc,
+  NullableFileInputBloc,
   BooleanInputBloc,
   DateInputBloc,
   ObjectInputBloc,
@@ -57,7 +58,7 @@ export {
 } from './blocs/task/handler/task-handler-state'
 export { DoTask } from './blocs/task/handler/task-handler-event'
 
-export { TaskBloc } from './blocs/task/task-bloc'
+export { TaskBloc, TaskBlocResponseType } from './blocs/task/task-bloc'
 export { TaskState, TaskStatus } from './blocs/task/task-state'
 export {
   TaskEvent,

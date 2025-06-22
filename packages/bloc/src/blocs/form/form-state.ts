@@ -1,40 +1,41 @@
+import { ApiResponse } from '../../api'
 import { Equatable } from '../../equatable'
 import { Optional } from '../../optional'
 
-export class FormState extends Equatable {
+export class FormState<R> extends Equatable {
   readonly isValid: boolean
   readonly isLoading: boolean
-  readonly isSubmitted: boolean
+  readonly response?: ApiResponse<R>
 
-  constructor(payload: {
+  constructor({
+    isValid = false,
+    isLoading = false,
+    response,
+  }: {
     isValid: boolean
-    isSubmitted: boolean
     isLoading: boolean
+    response?: ApiResponse<R>
   }) {
     super()
-    this.isValid = payload.isValid
-    this.isSubmitted = payload.isSubmitted
-    this.isLoading = payload.isLoading
+    this.isValid = isValid
+    this.isLoading = isLoading
+    this.response = response
   }
 
-  copyWith(payload: {
+  copyWith({
+    isValid,
+    isLoading,
+    response,
+  }: {
     isValid?: Optional<boolean>
-    isSubmitted?: Optional<boolean>
     isLoading?: Optional<boolean>
+    response?: Optional<ApiResponse<R> | undefined>
   }) {
     return new FormState({
-      isValid:
-        payload.isValid && payload.isValid.isValid
-          ? payload.isValid.value
-          : this.isValid,
-      isSubmitted:
-        payload.isSubmitted && payload.isSubmitted.isValid
-          ? payload.isSubmitted.value
-          : this.isSubmitted,
+      isValid: isValid && isValid.isValid ? isValid.value : this.isValid,
       isLoading:
-        payload.isLoading && payload.isLoading.isValid
-          ? payload.isLoading.value
-          : this.isLoading,
+        isLoading && isLoading.isValid ? isLoading.value : this.isLoading,
+      response: response && response.isValid ? response.value : this.response,
     })
   }
 
@@ -43,6 +44,6 @@ export class FormState extends Equatable {
   }
 
   get props(): unknown[] {
-    return [this.isValid, this.isLoading, this.isSubmitted]
+    return [this.isValid, this.isLoading, this.response]
   }
 }

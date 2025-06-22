@@ -6,16 +6,22 @@ import {
   Observer,
   Subscription,
   from,
-  firstValueFrom,
 } from 'rxjs'
 import { concatMap, filter, map } from 'rxjs/operators'
 import { BlocObserver } from './bloc-observer'
 import { Transition } from './transition'
-import { deepEqual } from 'fast-equals'
+import { deepEqual, State } from 'fast-equals'
 import { Equatable, isEqual } from './equatable'
 
 export type BlocState<B extends Bloc<unknown, unknown>> = B['state']
 export type BlocEvent<B extends Bloc<unknown, unknown>> = B['___eventType']
+export type MapEventToStateReturn<State> =
+  | Generator<State>
+  | AsyncGenerator<State>
+  | Iterable<State>
+  | AsyncIterable<State>
+  | Iterator<State>
+  | AsyncIterator<State>
 
 export abstract class Bloc<State, Event> implements Subscribable<State> {
   private readonly _state: BehaviorSubject<State>
@@ -103,7 +109,11 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
       this.transformEvents(this._event).pipe(
         concatMap((event: Event) => {
           this.onEvent(event)
-          return from(this.mapEventToState(event)).pipe(
+          const stateResult = this.mapEventToState(event)
+          const states = Array.isArray(stateResult)
+            ? stateResult
+            : [stateResult]
+          return from(states).pipe(
             map((state) => {
               return new Transition(this.state, event, state)
             }),
@@ -113,7 +123,7 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
     ).subscribe((transition: Transition<State, Event>) => {
       if (
         this.emitted === false ||
-        this.statesEqual(transition.currentState, transition.nextState) == false
+        !this.statesEqual(transition.currentState, transition.nextState)
       ) {
         this.onTransition(transition)
         this._transition.next(transition)
@@ -147,13 +157,5 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
     Bloc.observer.onTransition(this, transition)
   }
 
-  firstWhere(test: (state: State) => boolean): Promise<State> {
-    if (test(this.state)) {
-      return Promise.resolve(this.state)
-    }
-
-    return firstValueFrom(this.stream.pipe(filter(test)))
-  }
-
-  protected abstract mapEventToState(event: Event): AsyncGenerator<State>
+  protected abstract mapEventToState(event: Event): MapEventToStateReturn<State>
 }

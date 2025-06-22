@@ -1,12 +1,12 @@
 import { InputBloc } from '../input-bloc'
 import { Rule } from '../validation'
 
-export class FileInputBloc extends InputBloc<File, string> {
+export class NullableFileInputBloc extends InputBloc<File | null, string> {
   constructor(payload: {
     name: string
     value?: File
     isRequired?: boolean
-    rules?: Rule<File, string>[]
+    rules?: Rule<File | null, string>[]
   }) {
     super({
       name: payload.name,
@@ -16,7 +16,9 @@ export class FileInputBloc extends InputBloc<File, string> {
     })
   }
 
-  validateRequired(value: File): string | undefined {
-    return value.size < 1 ? `${this.title} cannot be empty` : undefined
+  validateRequired(value: File | null): string | undefined {
+    return !value || value.size < 1
+      ? `${this.title} cannot be empty`
+      : undefined
   }
 }

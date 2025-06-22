@@ -16,7 +16,13 @@ import { debounceTime, distinct } from 'rxjs'
 import { Optional } from '../../optional'
 import { ApiResponse } from '../../api'
 
-export abstract class FormBloc extends Bloc<FormState, FormEvent> {
+export type FormBlocResponseType<R extends FormBloc<any>> = R['___responseType']
+
+export abstract class FormBloc<R = any> extends Bloc<FormState<R>, FormEvent> {
+  get ___responseType(): R {
+    return {} as R
+  }
+
   abstract get fields(): InputBloc<any, any>[]
   readonly subscriptionsContainer = new SubscriptionsContainer()
   readonly id: string
@@ -26,7 +32,6 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
       new FormState({
         isValid: false,
         isLoading: false,
-        isSubmitted: false,
       }),
     )
     this.id = `${(Math.random() + 1).toString(36).substring(7)}-${(
@@ -60,7 +65,7 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
     }
   }
 
-  protected async *mapEventToState(event: FormEvent) {
+  protected *mapEventToState(event: FormEvent) {
     if (event instanceof FormValidChanged) {
       yield this.state.copyWith({
         isValid: Optional.value(event.isValid),
@@ -76,8 +81,8 @@ export abstract class FormBloc extends Bloc<FormState, FormEvent> {
           !event.response.errors ||
             Object.keys(event.response.errors).length == 0,
         ),
-        isSubmitted: Optional.value(event.response.status),
         isLoading: Optional.value(false),
+        response: Optional.value(event.response),
       })
       if (event.response.status && event.resetForm) {
         this.resetForm()

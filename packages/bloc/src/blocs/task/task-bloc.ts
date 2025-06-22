@@ -9,7 +9,7 @@ import {
 } from './task-event'
 import { TaskState } from './task-state'
 
-export type TaskResponseType<R extends TaskBloc<any>> = R['___responseType']
+export type TaskBlocResponseType<R extends TaskBloc<any>> = R['___responseType']
 
 export abstract class TaskBloc<R> extends Bloc<TaskState<R>, TaskEvent<R>> {
   get ___responseType(): R {
@@ -22,7 +22,7 @@ export abstract class TaskBloc<R> extends Bloc<TaskState<R>, TaskEvent<R>> {
     super(new TaskState())
   }
 
-  protected async *mapEventToState(event: TaskEvent<R>) {
+  protected *mapEventToState(event: TaskEvent<R>) {
     if (event instanceof TaskEventLoading) {
       yield this.state.copyWith({
         isLoading: Optional.value(true),

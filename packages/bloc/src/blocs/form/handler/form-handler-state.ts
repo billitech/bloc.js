@@ -10,12 +10,15 @@ export enum FormHandlerStatus {
 
 export class FormHandlerState<R> {
   readonly isLoading: boolean
-  readonly response?: ApiResponse<R>
+  readonly response?: ApiResponse<R> & { __formId: string }
 
   constructor({
     isLoading = false,
     response,
-  }: { isLoading?: boolean; response?: ApiResponse<R> } = {}) {
+  }: {
+    isLoading?: boolean
+    response?: ApiResponse<R> & { __formId: string }
+  } = {}) {
     this.isLoading = isLoading
     this.response = response
   }
@@ -25,7 +28,7 @@ export class FormHandlerState<R> {
     response,
   }: {
     isLoading?: Optional<boolean>
-    response?: Optional<ApiResponse<R> | undefined>
+    response?: Optional<(ApiResponse<R> & { __formId: string }) | undefined>
   }): FormHandlerState<R> {
     return new FormHandlerState<R>({
       isLoading:

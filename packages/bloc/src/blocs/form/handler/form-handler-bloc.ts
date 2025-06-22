@@ -8,14 +8,14 @@ import {
   getErrorResponseCode,
   getErrorStatusCode,
 } from '../../../util'
-import { FormBloc } from '../form-bloc'
+import { FormBloc, FormBlocResponseType } from '../form-bloc'
 import { SubmitForm } from './form-handler-event'
 import { FormHandlerState } from './form-handler-state'
 
-export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
-  FormHandlerState<R>,
-  SubmitForm<F>
-> {
+export abstract class FormHandlerBloc<
+  F extends FormBloc,
+  R = FormBlocResponseType<F>,
+> extends Bloc<FormHandlerState<R>, SubmitForm<F>> {
   constructor(readonly resetOnSuccess = false) {
     super(new FormHandlerState())
   }
@@ -30,7 +30,9 @@ export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
       const resp = await this.handleFormSubmission(event.form)
       yield this.state.copyWith({
         isLoading: Optional.value(false),
-        response: Optional.value(resp),
+        response: Optional.value(
+          Object.assign(resp, { __formId: event.form.id }),
+        ),
       })
       if (!event.form.closed) {
         event.form.emitFormSubmitted({
@@ -42,7 +44,9 @@ export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
       if (error instanceof FormValidationException) {
         yield this.state.copyWith({
           isLoading: Optional.value(false),
-          response: Optional.value(error.apiResponse<R>()),
+          response: Optional.value(
+            Object.assign(error.apiResponse<R>(), { __formId: event.form.id }),
+          ),
         })
 
         if (!event.form.closed) {
@@ -52,7 +56,9 @@ export abstract class FormHandlerBloc<F extends FormBloc, R> extends Bloc<
         const resp = this.getUnknownErrorResponse(error)
         yield this.state.copyWith({
           isLoading: Optional.value(false),
-          response: Optional.value(resp),
+          response: Optional.value(
+            Object.assign(resp, { __formId: event.form.id }),
+          ),
         })
         if (!event.form.closed) {
           event.form.emitFormSubmitted({

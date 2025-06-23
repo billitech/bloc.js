@@ -8,18 +8,21 @@ export class InputState<T, E> extends Equatable {
   private readonly _error?: E | null
   private readonly _isPure: boolean
   private readonly _forceError: boolean
+  private readonly _isValidating: boolean
 
   constructor(payload: {
     value: T
     error?: E | null
     isPure?: boolean
     forceError?: boolean
+    isValidating?: boolean
   }) {
     super()
     this._value = payload.value
     this._error = payload.error
     this._isPure = payload.isPure ?? true
     this._forceError = payload.forceError ?? false
+    this._isValidating = payload.isValidating ?? false
   }
 
   get value(): T {
@@ -32,6 +35,14 @@ export class InputState<T, E> extends Equatable {
 
   get forceError(): boolean {
     return this._forceError
+  }
+
+  get isValidating(): boolean {
+    return this._isValidating
+  }
+
+  get isNotValidating(): boolean {
+    return !this._isValidating
   }
 
   get error(): E | undefined | null {
@@ -63,6 +74,7 @@ export class InputState<T, E> extends Equatable {
     error?: Optional<E | null | undefined>
     isPure?: Optional<boolean>
     forceError?: Optional<boolean>
+    isValidating?: Optional<boolean>
   }): InputState<T, E> {
     return new InputState({
       value:
@@ -81,10 +93,20 @@ export class InputState<T, E> extends Equatable {
         payload.forceError && payload.forceError.isValid
           ? payload.forceError.value
           : this.forceError,
+      isValidating:
+        payload.isValidating && payload.isValidating.isValid
+          ? payload.isValidating.value
+          : this.isValidating,
     })
   }
 
   get props(): any[] {
-    return [this.value, this.error, this.isPure, this.forceError]
+    return [
+      this.value,
+      this.error,
+      this.isPure,
+      this.forceError,
+      this.isValidating,
+    ]
   }
 }

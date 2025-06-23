@@ -5,9 +5,11 @@ export abstract class FormEvent {}
 
 export class FormValidChanged extends FormEvent {
   readonly isValid: boolean
-  constructor(isValid: boolean) {
+  readonly isValidating: boolean
+  constructor(isValid: boolean, isValidating: boolean) {
     super()
     this.isValid = isValid
+    this.isValidating = isValidating
   }
 }
 

@@ -75,3 +75,12 @@ export class InputValidationError<E> extends InputEvent<any, E> {
     this.error = error
   }
 }
+
+export class AsyncValidationCompleted<T, E> extends InputEvent<T, E> {
+  constructor(
+    public readonly value: T,
+    public readonly error: E | undefined,
+  ) {
+    super()
+  }
+}

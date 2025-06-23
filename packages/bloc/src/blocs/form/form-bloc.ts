@@ -31,6 +31,7 @@ export abstract class FormBloc<R = any> extends Bloc<FormState<R>, FormEvent> {
     super(
       new FormState({
         isValid: false,
+        isValidating: false,
         isLoading: false,
       }),
     )
@@ -53,22 +54,26 @@ export abstract class FormBloc<R = any> extends Bloc<FormState<R>, FormEvent> {
   }
 
   protected validateField(field: InputBloc<unknown, unknown>) {
-    if (field.state.isInvalid) {
-      this.emitValidChanged(false)
-    } else {
-      const invalids = this.fields.filter(
-        (field2) => field2.state.isInvalid && field2 !== field,
-      )
-      if (invalids.length == 0) {
-        this.emitValidChanged(true)
-      }
-    }
+    const isValid = field.state.isInvalid
+      ? false
+      : this.fields.filter(
+          (field2) => field2.state.isInvalid && field2 !== field,
+        ).length == 0
+
+    const isValidating = field.state.isValidating
+      ? true
+      : this.fields.filter(
+          (field2) => field2.state.isValidating && field2 !== field,
+        ).length > 0
+
+    this.emitValidChanged(isValid, isValidating)
   }
 
   protected *mapEventToState(event: FormEvent) {
     if (event instanceof FormValidChanged) {
       yield this.state.copyWith({
         isValid: Optional.value(event.isValid),
+        isValidating: Optional.value(event.isValidating),
       })
     } else if (event instanceof FormLoadingChanged) {
       yield this.state.copyWith({
@@ -129,8 +134,8 @@ export abstract class FormBloc<R = any> extends Bloc<FormState<R>, FormEvent> {
     this.add(new ValidateForm())
   }
 
-  public emitValidChanged(isValid: boolean) {
-    this.add(new FormValidChanged(isValid))
+  public emitValidChanged(isValid: boolean, isValidating: boolean) {
+    this.add(new FormValidChanged(isValid, isValidating))
   }
 
   public emitLoadingChanged(loading: boolean) {

@@ -1,5 +1,11 @@
-export type ValidatorFunc<T> = (value: T) => boolean
-export type ErrorFormatterFunc<E> = (field: string, errorMessage: E) => E
+export type ValidatorFunc<T> = (
+  value: T,
+  signal?: AbortSignal,
+) => boolean | Promise<boolean>
+export type ErrorFormatterFunc<E> = (
+  field: string,
+  errorMessage: E,
+) => E | Promise<E>
 
 export class Rule<T, E> {
   protected errorMessage: E
@@ -24,16 +30,34 @@ export class Rule<T, E> {
     return this
   }
 
-  public validate(value: T, name: string): E | undefined {
-    if (!this.validator(value)) {
+  public validate(
+    value: T,
+    name: string,
+    signal?: AbortSignal,
+  ): E | undefined | Promise<E | undefined> {
+    const result = this.validator(value, signal)
+
+    if (result instanceof Promise) {
+      return result.then((valid) => {
+        if (!valid) {
+          return this.errorFormatter
+            ? this.errorFormatter(name, this.errorMessage)
+            : this.getErrorMessage(name)
+        }
+      })
+    }
+
+    if (!result) {
       return this.errorFormatter
         ? this.errorFormatter(name, this.errorMessage)
         : this.getErrorMessage(name)
     }
+
+    return undefined
   }
 
-  public getErrorMessage(field: string): E {
-    if (typeof this.errorMessage == 'string') {
+  public getErrorMessage(field: string): E | Promise<E> {
+    if (typeof this.errorMessage === 'string') {
       return this.errorMessage.replaceAll('{field}', field) as unknown as E
     }
 

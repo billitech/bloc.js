@@ -26,6 +26,7 @@ export {
   InputUnFocused,
   ResetInput,
   InputValidationError,
+  AsyncValidationCompleted,
 } from './blocs/form/input/input-event'
 
 export { FormHandlerBloc } from './blocs/form/handler/form-handler-bloc'

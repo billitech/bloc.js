@@ -17,6 +17,6 @@ export class Optional<T> {
   }
 
   public decideValue(other: T): T {
-    return this.value && this.isValid ? this.value : other
+    return this.isValid ? this.value : other
   }
 }

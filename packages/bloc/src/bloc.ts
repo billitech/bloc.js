@@ -23,8 +23,6 @@ export type MapEventToStateReturn<State> =
   | AsyncGenerator<State>
   | Iterable<State>
   | AsyncIterable<State>
-  | Iterator<State>
-  | AsyncIterator<State>
 
 export abstract class Bloc<State, Event> implements Subscribable<State> {
   private readonly _state: BehaviorSubject<State>
@@ -112,11 +110,7 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
       this.transformEvents(this._event).pipe(
         concatMap((event: Event) => {
           this.onEvent(event)
-          const stateResult = this.mapEventToState(event)
-          const states = Array.isArray(stateResult)
-            ? stateResult
-            : [stateResult]
-          return from(states).pipe(
+          return from(this.mapEventToState(event)).pipe(
             map((state) => {
               return new Transition(this.state, event, state)
             }),

@@ -6,12 +6,15 @@ import {
   Observer,
   Subscription,
   from,
+  firstValueFrom,
+  throwError,
 } from 'rxjs'
-import { concatMap, filter, map } from 'rxjs/operators'
+import { concatMap, filter, map, timeout } from 'rxjs/operators'
 import { BlocObserver } from './bloc-observer'
 import { Transition } from './transition'
-import { deepEqual, State } from 'fast-equals'
+import { deepEqual } from 'fast-equals'
 import { Equatable, isEqual } from './equatable'
+import { BlocTimeoutException } from './exceptions/timeout-exception'
 
 export type BlocState<B extends Bloc<unknown, unknown>> = B['state']
 export type BlocEvent<B extends Bloc<unknown, unknown>> = B['___eventType']
@@ -155,6 +158,50 @@ export abstract class Bloc<State, Event> implements Subscribable<State> {
 
   onTransition(transition: Transition<State, Event>): void {
     Bloc.observer.onTransition(this, transition)
+  }
+
+  firstWhere(
+    test: (state: State) => boolean,
+    {
+      timeLimit,
+      timeoutError,
+      listenWhen,
+    }: {
+      timeLimit?: number
+      timeoutError?: () => Error
+      listenWhen?: (previous: State, current: State) => boolean
+    } = {
+      timeLimit: 120_000,
+    },
+  ): Promise<State> {
+    if (test(this.state)) {
+      return Promise.resolve(this.state)
+    }
+
+    let previousState = this.state
+    return firstValueFrom(
+      this.stream.pipe(
+        filter((state) => {
+          if (
+            (!listenWhen || listenWhen(previousState, state)) &&
+            test(state)
+          ) {
+            return true
+          }
+          previousState = state
+          return false
+        }),
+        timeout({
+          each: timeLimit ?? 120_000,
+          with: () => {
+            const error = timeoutError
+              ? timeoutError()
+              : new BlocTimeoutException(`Timeout after ${timeLimit}ms`)
+            return throwError(() => error)
+          },
+        }),
+      ),
+    )
   }
 
   protected abstract mapEventToState(event: Event): MapEventToStateReturn<State>

@@ -35,7 +35,7 @@ export {
 } from './blocs/form/handler/form-handler-state'
 export { SubmitForm as ButtonPressed } from './blocs/form/handler/form-handler-event'
 
-export { FormValidationException } from './exceptions/form-validation-exception'
+export { FormValidationException, BlocTimeoutException } from './exceptions'
 
 export { SubscriptionsContainer } from './subscriptions-container'
 

@@ -1,4 +1,5 @@
 import { InputBloc } from '../input-bloc'
+import { InputState } from '../input-state'
 import { Rule } from '../validation'
 
 export class FileInputBloc extends InputBloc<File, string> {
@@ -18,5 +19,17 @@ export class FileInputBloc extends InputBloc<File, string> {
 
   validateRequired(value: File): string | undefined {
     return value.size < 1 ? `${this.title} cannot be empty` : undefined
+  }
+
+  statesEqual(
+    currentState: InputState<File, string>,
+    nextState: InputState<File, string>,
+  ): boolean {
+    return (
+      currentState.value === nextState.value &&
+      currentState.error === nextState.error &&
+      currentState.isPure === nextState.isPure &&
+      currentState.forceError === nextState.forceError
+    )
   }
 }

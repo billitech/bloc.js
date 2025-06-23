@@ -1,6 +1,6 @@
 {
   "name": "@billitech/vue-bloc",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "Vue Components that make it easy to implement the BLoC (Business Logic Component) design pattern. Built to be used with the bloc.js state management package.",
   "keywords": [
     "vue",
@@ -53,7 +53,7 @@
   },
   "devDependencies": {
     "@babel/types": "^7.25.9",
-    "@billitech/bloc": "^0.1.5",
+    "@billitech/bloc": "^0.1.6",
     "@rollup/plugin-commonjs": "^28.0.1",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^15.3.0",
